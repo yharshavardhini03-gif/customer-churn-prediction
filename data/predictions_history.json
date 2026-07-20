@@ -1,0 +1,39 @@
+{
+    "tester@churnguard.ai": [
+        {
+            "id": "C-TEST-001",
+            "name": "Priya",
+            "contract": "Silver Member",
+            "tenure": 1,
+            "mc": 30.0,
+            "cp": 0.9743,
+            "risk": "High",
+            "date": "2026-07-21",
+            "timestamp": 1784582118.325831
+        }
+    ],
+    "admin@churnguard.ai": [
+        {
+            "id": "5",
+            "name": "harsha",
+            "contract": "Silver Member",
+            "tenure": 16,
+            "mc": 28.12,
+            "cp": 0.0185,
+            "risk": "Low",
+            "date": "2026-07-21",
+            "timestamp": 1784582887.278135
+        },
+        {
+            "id": "5",
+            "name": "harsha",
+            "contract": "Silver Member",
+            "tenure": 1,
+            "mc": 80.0,
+            "cp": 0.8599,
+            "risk": "High",
+            "date": "2026-07-21",
+            "timestamp": 1784583112.084825
+        }
+    ]
+}

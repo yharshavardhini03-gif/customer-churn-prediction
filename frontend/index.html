@@ -1,0 +1,1980 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>ChurnGuard AI - Customer Churn Prediction Platform</title>
+<meta name="description" content="AI-powered customer churn prediction platform. Predict, analyze and retain customers with machine learning."/>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Inter",sans-serif;overflow-x:hidden}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-thumb{background:#334155;border-radius:4px}
+
+/* ── Landing ── */
+.land-bg{background:linear-gradient(135deg,#0f172a 0%,#1e1b4b 40%,#0c1445 70%,#0f172a 100%);min-height:100vh}
+.orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:.35;pointer-events:none;animation:orb-float 8s ease-in-out infinite alternate}
+.orb1{width:500px;height:500px;background:radial-gradient(circle,#6366f1,#4338ca);top:-100px;right:-100px}
+.orb2{width:400px;height:400px;background:radial-gradient(circle,#06b6d4,#0e7490);bottom:100px;left:-80px;animation-delay:-4s}
+.orb3{width:300px;height:300px;background:radial-gradient(circle,#8b5cf6,#6d28d9);top:40%;left:40%;animation-delay:-2s}
+@keyframes orb-float{from{transform:translateY(0) scale(1)}to{transform:translateY(-40px) scale(1.08)}}
+.glass{background:rgba(255,255,255,0.06);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.12);border-radius:16px}
+.glass-card{background:rgba(255,255,255,0.05);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.10);border-radius:16px;transition:all .25s}
+.glass-card:hover{background:rgba(255,255,255,0.09);border-color:rgba(99,102,241,0.4);transform:translateY(-4px);box-shadow:0 20px 40px rgba(0,0,0,0.3)}
+.hero-grad{background:linear-gradient(90deg,#ffffff,#a5b4fc,#38bdf8,#a5b4fc,#ffffff);background-size:300% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:grad-anim 5s linear infinite}
+@keyframes grad-anim{to{background-position:300% center}}
+.glow-btn{background:linear-gradient(135deg,#6366f1,#4f46e5);box-shadow:0 0 20px rgba(99,102,241,.45),0 4px 15px rgba(0,0,0,.3);transition:all .2s}
+.glow-btn:hover{transform:translateY(-2px);box-shadow:0 0 32px rgba(99,102,241,.65),0 8px 24px rgba(0,0,0,.4)}
+.outline-btn{border:1.5px solid rgba(255,255,255,0.25);color:#e2e8f0;transition:all .2s}
+.outline-btn:hover{border-color:rgba(99,102,241,.6);background:rgba(99,102,241,.15);transform:translateY(-2px)}
+.stat-num{font-size:2.5rem;font-weight:800;background:linear-gradient(135deg,#fff,#a5b4fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.fu{animation:fadeUp .5s ease both}
+@keyframes sp{to{transform:rotate(360deg)}}
+.spin{animation:sp .9s linear infinite}
+.fu1{animation:fadeUp .5s .05s ease both}
+.fu2{animation:fadeUp .5s .1s ease both}
+.fu3{animation:fadeUp .5s .15s ease both}
+.fu4{animation:fadeUp .5s .2s ease both}
+.fu5{animation:fadeUp .5s .25s ease both}
+.fu6{animation:fadeUp .5s .3s ease both}
+
+/* ── Login ── */
+.login-bg{background:linear-gradient(135deg,#0f172a 0%,#1e1b4b 50%,#0c1445 100%);min-height:100vh;display:flex;align-items:center;justify-content:center}
+.login-card{background:rgba(255,255,255,0.97);border-radius:24px;padding:48px;width:100%;max-width:420px;box-shadow:0 30px 80px rgba(0,0,0,0.5)}
+.lfi{width:100%;padding:11px 14px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:14px;color:#1e293b;outline:none;transition:all .18s;font-family:inherit;background:#f8fafc}
+.lfi:focus{border-color:#6366f1;background:#fff;box-shadow:0 0 0 3px rgba(99,102,241,0.12)}
+.lfl{font-size:12px;font-weight:600;color:#475569;margin-bottom:6px;display:block;text-transform:uppercase;letter-spacing:.5px}
+.lerr{background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:10px 14px;font-size:13px;color:#dc2626;display:flex;align-items:center;gap:8px}
+
+/* ── Dashboard ── */
+body.dash-mode{background:#080c14;color:#f8fafc}
+.sl{display:flex;align-items:center;gap:10px;padding:10px 16px;border-radius:10px;font-size:14px;font-weight:500;color:#94a3b8;cursor:pointer;transition:all .18s;white-space:nowrap;background:none;border:none;width:100%;text-align:left}
+.sl:hover{background:rgba(255,255,255,0.05);color:#a5b4fc}
+.sl.active{background:rgba(99,102,241,0.15);color:#818cf8;font-weight:600}
+.badge{display:inline-flex;align-items:center;padding:2px 10px;border-radius:999px;font-size:11px;font-weight:600;letter-spacing:.2px}
+.fi{width:100%;padding:9.5px 12px;border:1.5px solid #1e293b;border-radius:9px;font-size:14px;color:#f8fafc;background:#080c14;outline:none;transition:all .18s}
+.fi:focus{border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,0.2)}
+.fl{font-size:11px;font-weight:600;color:#94a3b8;margin-bottom:5px;display:block;text-transform:uppercase;letter-spacing:.5px}
+.pb{height:6px;background:#1e293b;border-radius:999px;overflow:hidden}
+.pf{height:100%;border-radius:999px;transition:width 1s cubic-bezier(.4,0,.2,1)}
+.card{background:#0f172a;border:1px solid #1e293b;border-radius:16px;box-shadow:0 4px 20px rgba(0,0,0,0.3)}
+
+/* ── Premium Dark Mode Overrides ── */
+body.dash-mode h1, body.dash-mode h2, body.dash-mode h3, body.dash-mode h4 { color: #f8fafc !important; }
+body.dash-mode p { color: #94a3b8; }
+body.dash-mode table th { color: #94a3b8 !important; border-bottom-color: #1e293b !important; }
+body.dash-mode table td { color: #e2e8f0 !important; border-bottom-color: #1e293b !important; }
+body.dash-mode tr:hover { background-color: rgba(99, 102, 241, 0.08) !important; }
+body.dash-mode label { color: #94a3b8 !important; }
+body.dash-mode .text-slate-800 { color: #f8fafc !important; }
+body.dash-mode .text-slate-700 { color: #e2e8f0 !important; }
+body.dash-mode .text-slate-600 { color: #cbd5e1 !important; }
+body.dash-mode .text-slate-500 { color: #94a3b8 !important; }
+body.dash-mode .text-slate-900 { color: #f8fafc !important; }
+body.dash-mode .bg-white { background-color: #0f172a !important; }
+body.dash-mode .border-slate-200 { border-color: #1e293b !important; }
+body.dash-mode .border-slate-100 { border-color: #1e293b !important; }
+body.dash-mode .bg-slate-50 { background-color: #080c14 !important; }
+body.dash-mode .bg-slate-100 { background-color: #030712 !important; }
+body.dash-mode .text-slate-400 { color: #64748b !important; }
+body.dash-mode .text-slate-500 { color: #94a3b8 !important; }
+body.dash-mode select.fi { background-color: #080c14 !important; color: #f8fafc !important; }
+body.dash-mode option { background-color: #0f172a !important; color: #f8fafc !important; }
+body.dash-mode footer { border-top-color: #1e293b !important; background-color: #0f172a !important; }
+body.dash-mode .bg-indigo-50 { background-color: rgba(99, 102, 241, 0.15) !important; color: #a5b4fc !important; }
+body.dash-mode .text-indigo-600 { color: #a5b4fc !important; }
+body.dash-mode .text-slate-900 { color: #f8fafc !important; }
+body.dash-mode input.fi::placeholder { color: #475569 !important; }
+body.dash-mode .border-l-4 { border-left-width: 4px !important; }
+body.dash-mode .bg-emerald-50 { background-color: rgba(16, 185, 129, 0.1) !important; color: #34d399 !important; }
+body.dash-mode .text-emerald-600 { color: #34d399 !important; }
+body.dash-mode .bg-red-50 { background-color: rgba(239, 68, 68, 0.1) !important; color: #f87171 !important; }
+body.dash-mode .text-red-600 { color: #f87171 !important; }
+body.dash-mode .bg-amber-50 { background-color: rgba(245, 158, 11, 0.1) !important; color: #fbbf24 !important; }
+body.dash-mode .text-amber-600 { color: #fbbf24 !important; }
+body.dash-mode .bg-blue-50 { background-color: rgba(59, 130, 246, 0.1) !important; color: #60a5fa !important; }
+body.dash-mode .text-blue-600 { color: #60a5fa !important; }
+body.dash-mode .bg-orange-50 { background-color: rgba(249, 115, 22, 0.1) !important; color: #fb923c !important; }
+body.dash-mode .text-orange-600 { color: #fb923c !important; }
+body.dash-mode .bg-yellow-50 { background-color: rgba(234, 179, 8, 0.1) !important; color: #fde047 !important; }
+body.dash-mode .text-yellow-700 { color: #fde047 !important; }
+body.dash-mode .bg-slate-100 { background-color: #1e293b !important; color: #cbd5e1 !important; }
+body.dash-mode .text-slate-600 { color: #cbd5e1 !important; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const {useState, useEffect, useRef, useCallback} = React;
+
+/* ── API ─── */
+const BASE = "";
+const apiGet  = p => fetch(BASE+p).then(r=>r.json());
+const apiPost = (p,b) => fetch(BASE+p,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(b)}).then(r=>r.json());
+
+/* ── SVG Icons ─── */
+const P = {
+  dashboard:"M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6",
+  analytics:"M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z",
+  customers:"M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z",
+  predict:"M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z",
+  history:"M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z",
+  bell:"M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9",
+  search:"M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z",
+  cr:"M9 5l7 7-7 7", cd:"M19 9l-7 7-7-7",
+  up:"M5 10l7-7m0 0l7 7m-7-7v18", down:"M19 14l-7 7m0 0l-7-7m7 7V3",
+  users:"M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z",
+  money:"M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z",
+  shield:"M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z",
+  warning:"M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z",
+  check:"M5 13l4 4L19 7", x:"M6 18L18 6M6 6l12 12",
+  logout:"M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1",
+  eye:"M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z",
+  eyeoff:"M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21",
+  trend:"M13 7h8m0 0v8m0-8l-8 8-4-4-6 6",
+  spark:"M13 10V3L4 14h7v7l9-11h-7z",
+  chart2:"M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z",
+  globe:"M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z",
+  lock:"M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z",
+  mail:"M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z",
+  phone:"M2.25 6.527c0-1.002.671-1.867 1.63-2.125l2.26-.627a2.25 2.25 0 012.409 1.004l1.023 1.867a2.25 2.25 0 01-.45 2.534l-1.5 1.5a11.009 11.009 0 005.248 5.248l1.5-1.5a2.25 2.25 0 012.534-.45l1.867 1.023a2.25 2.25 0 011.004 2.409l-.627 2.26a2.25 2.25 0 01-2.125 1.63 19.5 19.5 0 01-17.25-17.25z",
+  arrow:"M14 5l7 7m0 0l-7 7m7-7H3",
+  batch:"M9 13h6m-3-3v6m-9 1V4a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z",
+  about:"M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+};
+const Ic = ({n,cls="w-5 h-5"}) => (
+  <svg className={cls} fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" d={P[n]}/>
+  </svg>
+);
+
+/* ── Badge ── */
+const BS={High:"bg-red-50 text-red-600",Medium:"bg-amber-50 text-amber-600",Low:"bg-emerald-50 text-emerald-600",Bronze:"bg-orange-50 text-orange-600",Silver:"bg-slate-100 text-slate-600",Gold:"bg-yellow-50 text-yellow-700"};
+const Badge=({text})=><span className={`badge ${BS[text]||"bg-blue-50 text-blue-600"}`}>{text}</span>;
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   LANDING PAGE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+const FEATURES = [
+  {icon:"spark",  title:"AI Predictions",   desc:"Random Forest + XGBoost ensemble delivers 91.4% accuracy on churn predictions in real time.",       color:"from-indigo-500 to-purple-600"},
+  {icon:"chart2", title:"Live Analytics",   desc:"Interactive charts, risk distribution donut, feature importance bars — all updating automatically.",color:"from-cyan-500 to-blue-600"},
+  {icon:"users",  title:"Customer Intel",   desc:"Searchable customer table with risk filters, tenure tracking and monthly charge analytics.",         color:"from-emerald-500 to-teal-600"},
+  {icon:"globe",  title:"REST API",         desc:"Full Flask REST API with CORS. Connect to any BI tool, CRM or custom application via JSON endpoints.",color:"from-orange-500 to-red-500"},
+  {icon:"shield", title:"Risk Segmentation",desc:"Automatic High / Medium / Low risk classification with color-coded badges and progress indicators.",  color:"from-violet-500 to-indigo-600"},
+  {icon:"history",title:"Full Audit Trail",desc:"Every prediction logged with timestamp, confidence score, customer tier and churn probability bar.",    color:"from-pink-500 to-rose-600"},
+];
+const STATS = [
+  {num:"91.4%",  label:"Model Accuracy"},
+  {num:"12,847", label:"Customers Analyzed"},
+  {num:"<50ms",  label:"Prediction Speed"},
+  {num:"6",      label:"ML Features"},
+];
+
+const LandingPage = ({onLogin}) => {
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(()=>{
+    const h=()=>setScrolled(window.scrollY>20);
+    window.addEventListener("scroll",h);
+    return()=>window.removeEventListener("scroll",h);
+  },[]);
+
+  return (
+    <div className="land-bg relative overflow-hidden">
+      <div className="orb orb1"/>
+      <div className="orb orb2"/>
+      <div className="orb orb3"/>
+
+      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled?"glass":"bg-transparent"}`}>
+        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center">
+              <Ic n="shield" cls="w-5 h-5 text-white"/>
+            </div>
+            <span className="font-bold text-white text-lg tracking-tight">ChurnGuard <span className="text-indigo-400">AI</span></span>
+          </div>
+          <div className="hidden md:flex items-center gap-8">
+            {["Features","Analytics","API","Pricing"].map(l=>(
+              <a key={l} href="#" className="text-slate-300 hover:text-white text-sm font-medium transition-colors">{l}</a>
+            ))}
+          </div>
+          <div className="flex items-center gap-3">
+            <button onClick={onLogin} className="outline-btn px-5 py-2 rounded-xl text-sm font-semibold">Sign In</button>
+            <button onClick={onLogin} className="glow-btn text-white px-5 py-2 rounded-xl text-sm font-semibold">Get Started</button>
+          </div>
+        </div>
+      </nav>
+
+      <section className="relative min-h-screen flex items-center justify-center px-6 pt-24 pb-16">
+        <div className="max-w-5xl mx-auto text-center">
+          <div className="fu inline-flex items-center gap-2 glass px-4 py-2 rounded-full text-xs font-semibold text-indigo-300 mb-8">
+            <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse"></span>
+            Powered by Random Forest + XGBoost Ensemble
+          </div>
+          <h1 className="fu1 text-5xl md:text-7xl font-black text-white leading-tight mb-6">
+            Predict Customer<br/>
+            <span className="hero-grad">Churn with AI</span>
+          </h1>
+          <p className="fu2 text-xl text-slate-400 max-w-2xl mx-auto mb-10 leading-relaxed">
+            Stop losing customers before it happens. ChurnGuard AI analyzes behavioral patterns and predicts who's at risk — so you can act before they leave.
+          </p>
+          <div className="fu3 flex flex-col sm:flex-row items-center justify-center gap-4">
+            <button onClick={onLogin}
+              className="glow-btn text-white px-8 py-4 rounded-2xl text-base font-bold flex items-center gap-3 w-full sm:w-auto justify-center">
+              Launch Dashboard <Ic n="arrow" cls="w-5 h-5"/>
+            </button>
+            <button className="outline-btn px-8 py-4 rounded-2xl text-base font-semibold w-full sm:w-auto">
+              View Demo
+            </button>
+          </div>
+          <div className="fu4 mt-16 glass rounded-2xl p-1 max-w-3xl mx-auto">
+            <div className="bg-slate-900/60 rounded-xl p-4">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+                <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                <span className="ml-2 text-xs text-slate-500 font-mono">http://127.0.0.1:8080/</span>
+              </div>
+              <div className="grid grid-cols-4 gap-3 mb-4">
+                {[["12,847","Customers","bg-blue-600"],["24.5%","Churn Rate","bg-red-500"],["9,699","Retained","bg-emerald-500"],["$68.40","Avg Revenue","bg-amber-500"]].map(([v,l,c])=>(
+                  <div key={l} className="glass-card p-3 text-left">
+                    <div className={`w-6 h-6 rounded-lg ${c} mb-2 flex items-center justify-center`}>
+                      <div className="w-2 h-2 bg-white rounded-sm opacity-80"/>
+                    </div>
+                    <p className="text-xs text-slate-400 mb-0.5">{l}</p>
+                    <p className="text-sm font-bold text-white">{v}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
+                <div className="h-full bg-gradient-to-r from-indigo-500 to-cyan-500 rounded-full" style={{width:"65%"}}/>
+              </div>
+              <p className="text-right text-xs text-slate-500 mt-1">Churn Risk: 65%</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="relative py-16 px-6">
+        <div className="max-w-5xl mx-auto">
+          <div className="glass rounded-3xl p-8">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
+              {STATS.map((s,i)=>(
+                <div key={i}>
+                  <div className="stat-num mb-2">{s.num}</div>
+                  <p className="text-slate-400 text-sm font-medium">{s.label}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="relative py-20 px-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-14">
+            <p className="text-indigo-400 text-sm font-semibold uppercase tracking-widest mb-3">Everything you need</p>
+            <h2 className="text-4xl font-black text-white mb-4">Built for Customer Success Teams</h2>
+            <p className="text-slate-400 max-w-xl mx-auto">A complete platform to identify at-risk customers, understand churn drivers and take action before it's too late.</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {FEATURES.map((f,i)=>(
+              <div key={i} className="glass-card p-6">
+                <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${f.color} flex items-center justify-center mb-4`}>
+                  <Ic n={f.icon} cls="w-6 h-6 text-white"/>
+                </div>
+                <h3 className="text-white font-bold text-lg mb-2">{f.title}</h3>
+                <p className="text-slate-400 text-sm leading-relaxed">{f.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="relative py-20 px-6">
+        <div className="max-w-3xl mx-auto text-center">
+          <div className="glass rounded-3xl p-12">
+            <h2 className="text-4xl font-black text-white mb-4">Ready to stop churn?</h2>
+            <p className="text-slate-400 mb-8">Sign in and run your first AI prediction in under 60 seconds.</p>
+            <button onClick={onLogin}
+              className="glow-btn text-white px-10 py-4 rounded-2xl text-base font-bold inline-flex items-center gap-3">
+              Start Predicting Now <Ic n="arrow" cls="w-5 h-5"/>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <footer className="relative border-t border-white/10 py-8 px-6 text-center">
+        <div className="flex items-center justify-center gap-2 mb-3">
+          <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center">
+            <Ic n="shield" cls="w-3.5 h-3.5 text-white"/>
+          </div>
+          <span className="text-white font-bold text-sm">ChurnGuard AI</span>
+        </div>
+        <p className="text-slate-500 text-xs">Built with Random Forest + XGBoost · Flask · React · Tailwind CSS</p>
+      </footer>
+    </div>
+  );
+};
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   LOGIN PAGE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+const DEMO_USERS = [
+  {email:"admin@churnguard.ai", password:"admin123",  name:"Admin",   role:"Administrator"},
+  {email:"analyst@churnguard.ai",password:"analyst123",name:"Analyst", role:"Data Analyst"},
+  {email:"demo@churnguard.ai",  password:"demo123",   name:"Demo",    role:"Read Only"},
+];
+
+const LoginPage = ({onLogin, onBack}) => {
+  const [credential, setCredential] = useState("");
+  const [password,   setPassword]   = useState("");
+  const [showPw,     setShowPw]     = useState(false);
+  const [remember,   setRemember]   = useState(false);
+  const [loading,    setLoading]    = useState(false);
+  const [err,        setErr]        = useState("");
+  const [showForgot, setShowForgot] = useState(false);
+  const [forgotCred, setForgotCred] = useState("");
+  const [resetCode,  setResetCode]  = useState("");
+  const [newPw,      setNewPw]      = useState("");
+  const [forgotStep, setForgotStep] = useState("email"); // email, code, reset
+  const [forgotErr,  setForgotErr]  = useState("");
+  const [forgotMsg,  setForgotMsg]  = useState("");
+
+  const submit = async (e) => {
+    e.preventDefault();
+    setErr(""); setLoading(true);
+    await new Promise(r=>setTimeout(r,900));
+
+    const cred = credential.trim();
+    if (!cred || !password.trim()) {
+      setErr("Please enter both email/phone and password.");
+      setLoading(false);
+      return;
+    }
+
+    const normalizedCred = cred.toLowerCase();
+    const storedUsers = JSON.parse(localStorage.getItem("cg_users") || "[]");
+    
+    // Try to find user by email or phone
+    let existing = DEMO_USERS.find(u => u.email.toLowerCase() === normalizedCred) || 
+                   storedUsers.find(u => u.email.toLowerCase() === normalizedCred);
+    
+    if (!existing) {
+      existing = storedUsers.find(u => u.phone && u.phone.trim() === cred);
+    }
+
+    if (existing) {
+      if (existing.password === password) {
+        const user = {...existing, email: existing.email.toLowerCase()};
+        if (remember) localStorage.setItem("cg_user", JSON.stringify(user));
+        onLogin(user);
+      } else {
+        setErr("Invalid credentials.");
+      }
+    } else {
+      // Create new account with phone
+      const isPhone = /^[\d\s\-\+\(\)]+$/.test(cred);
+      if (!isPhone) {
+        setErr("New accounts require a phone number. Please enter your phone number.");
+      } else {
+        const newUser = {
+          email: `user_${Date.now()}@churnguard.ai`,
+          phone: cred,
+          password,
+          name: cred,
+          role: "User"
+        };
+        localStorage.setItem("cg_users", JSON.stringify([...storedUsers, newUser]));
+        if (remember) localStorage.setItem("cg_user", JSON.stringify(newUser));
+        onLogin(newUser);
+      }
+    }
+
+    setLoading(false);
+  };
+
+  const fillDemo = (u) => { setCredential(u.email); setPassword(u.password); setErr(""); };
+
+  // Forgot Password Handler
+  const handleForgotSubmit = async (e) => {
+    e.preventDefault();
+    setForgotErr(""); setForgotMsg("");
+
+    if (forgotStep === "email") {
+      const cred = forgotCred.trim();
+      const storedUsers = JSON.parse(localStorage.getItem("cg_users") || "[]");
+      
+      let user = DEMO_USERS.find(u => u.email.toLowerCase() === cred.toLowerCase()) || 
+                 storedUsers.find(u => u.email.toLowerCase() === cred.toLowerCase());
+      
+      if (!user) {
+        user = storedUsers.find(u => u.phone && u.phone.trim() === cred);
+      }
+
+      if (!user) {
+        setForgotErr("User not found with this email or phone number.");
+        return;
+      }
+
+      // Generate and store reset code
+      const code = Math.random().toString().slice(2, 8);
+      localStorage.setItem(`reset_${user.email}`, JSON.stringify({code, timestamp: Date.now()}));
+      
+      // Simulate sending message
+      const isPhone = /^[\d\s\-\+\(\)]+$/.test(cred);
+      if (isPhone) {
+        setForgotMsg(`SMS sent to ${cred}\nReset code: ${code} (valid for 10 minutes)`);
+      } else {
+        setForgotMsg(`Email sent to ${cred}\nReset code: ${code} (valid for 10 minutes)`);
+      }
+      
+      setForgotStep("code");
+    } else if (forgotStep === "code") {
+      if (resetCode.length !== 6) {
+        setForgotErr("Reset code must be 6 digits.");
+        return;
+      }
+
+      const cred = forgotCred.trim();
+      const storedUsers = JSON.parse(localStorage.getItem("cg_users") || "[]");
+      
+      let user = DEMO_USERS.find(u => u.email.toLowerCase() === cred.toLowerCase()) || 
+                 storedUsers.find(u => u.email.toLowerCase() === cred.toLowerCase());
+      
+      if (!user) {
+        user = storedUsers.find(u => u.phone && u.phone.trim() === cred);
+      }
+
+      if (!user) {
+        setForgotErr("User not found.");
+        return;
+      }
+
+      const stored = JSON.parse(localStorage.getItem(`reset_${user.email}`) || "{}");
+      if (stored.code !== resetCode) {
+        setForgotErr("Invalid reset code.");
+        return;
+      }
+
+      if (Date.now() - stored.timestamp > 600000) {
+        setForgotErr("Reset code expired. Please request a new one.");
+        localStorage.removeItem(`reset_${user.email}`);
+        setForgotStep("email");
+        setResetCode("");
+        return;
+      }
+
+      setForgotMsg("Code verified! Now enter your new password.");
+      setForgotStep("reset");
+    } else if (forgotStep === "reset") {
+      if (newPw.length < 6) {
+        setForgotErr("Password must be at least 6 characters.");
+        return;
+      }
+
+      const cred = forgotCred.trim();
+      const storedUsers = JSON.parse(localStorage.getItem("cg_users") || "[]");
+      
+      let user = DEMO_USERS.find(u => u.email.toLowerCase() === cred.toLowerCase()) || 
+                 storedUsers.find(u => u.email.toLowerCase() === cred.toLowerCase());
+      
+      if (!user) {
+        user = storedUsers.find(u => u.phone && u.phone.trim() === cred);
+      }
+
+      if (!user) {
+        setForgotErr("User not found.");
+        return;
+      }
+
+      // Update password in stored users
+      if (user.email !== DEMO_USERS.find(d => d.email === user.email)?.email) {
+        const idx = storedUsers.findIndex(u => u.email === user.email);
+        if (idx >= 0) {
+          storedUsers[idx].password = newPw;
+          localStorage.setItem("cg_users", JSON.stringify(storedUsers));
+        }
+      }
+
+      localStorage.removeItem(`reset_${user.email}`);
+      setForgotMsg("Password reset successful! You can now login with your new password.");
+      setTimeout(() => {
+        setShowForgot(false);
+        setForgotStep("email");
+        setForgotCred("");
+        setResetCode("");
+        setNewPw("");
+        setForgotMsg("");
+      }, 2000);
+    }
+  };
+
+  const closeForgot = () => {
+    setShowForgot(false);
+    setForgotStep("email");
+    setForgotCred("");
+    setResetCode("");
+    setNewPw("");
+    setForgotErr("");
+    setForgotMsg("");
+  };
+
+  return (
+    <div className="login-bg relative overflow-hidden">
+      <div className="orb orb1" style={{opacity:.25}}/>
+      <div className="orb orb2" style={{opacity:.2}}/>
+      <div className="relative z-10 min-h-screen flex flex-col items-center justify-center px-4 py-12">
+
+        <button onClick={onBack} className="absolute top-6 left-6 flex items-center gap-2 text-slate-400 hover:text-white transition-colors text-sm font-medium">
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7"/>
+          </svg>
+          Back to Home
+        </button>
+
+        <div className="login-card fu">
+          <div className="flex items-center justify-center gap-2.5 mb-8">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center shadow-lg">
+              <Ic n="shield" cls="w-5 h-5 text-white"/>
+            </div>
+            <div>
+              <p className="font-black text-slate-800 text-lg leading-none">ChurnGuard</p>
+              <p className="text-indigo-600 font-bold text-sm leading-none">AI Platform</p>
+            </div>
+          </div>
+
+          <h2 className="text-2xl font-black text-slate-800 mb-1 text-center">Welcome back</h2>
+          <p className="text-slate-500 text-sm text-center mb-7">Sign in to your dashboard</p>
+
+          {err && (
+            <div className="lerr mb-4">
+              <Ic n="warning" cls="w-4 h-4 flex-shrink-0"/>
+              {err}
+            </div>
+          )}
+
+          <form onSubmit={submit} className="space-y-4">
+            <div>
+              <label className="lfl">Email or Phone Number</label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+                  <Ic n="mail" cls="w-4 h-4"/>
+                </span>
+                <input type="text" className="lfi pl-10" 
+                  placeholder="admin@churnguard.ai or +919876543210"
+                  value={credential} onChange={e=>{setCredential(e.target.value);setErr("")}} required/>
+              </div>
+              <p className="text-xs text-slate-400 mt-2">Enter your email address or phone number to sign in.</p>
+            </div>
+            <div>
+              <label className="lfl">Password</label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+                  <Ic n="lock" cls="w-4 h-4"/>
+                </span>
+                <input type={showPw?"text":"password"} className="lfi pl-10 pr-10"
+                  placeholder="Enter your password"
+                  value={password} onChange={e=>{setPassword(e.target.value);setErr("")}} required/>
+                <button type="button" onClick={()=>setShowPw(!showPw)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                  <Ic n={showPw?"eyeoff":"eye"} cls="w-4 h-4"/>
+                </button>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" className="w-4 h-4 rounded accent-indigo-600"
+                  checked={remember} onChange={e=>setRemember(e.target.checked)}/>
+                <span className="text-sm text-slate-600">Remember me</span>
+              </label>
+              <button type="button" onClick={()=>setShowForgot(true)} 
+                className="text-sm text-indigo-600 font-semibold hover:text-indigo-700">Forgot password?</button>
+            </div>
+
+            <button type="submit" disabled={loading}
+              className="w-full py-3 rounded-xl text-white font-bold text-sm flex items-center justify-center gap-2 transition-all"
+              style={{background:"linear-gradient(135deg,#6366f1,#4f46e5)",boxShadow:"0 4px 20px rgba(99,102,241,0.4)"}}>
+              {loading
+                ? <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full spin"/>Signing in...</>
+                : <><Ic n="shield" cls="w-4 h-4"/>Sign In to Dashboard</>}
+            </button>
+          </form>
+
+          <div className="mt-6 pt-6 border-t border-slate-100">
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide text-center mb-3">Demo Accounts — Click to fill</p>
+            <div className="space-y-2">
+              {DEMO_USERS.map((u,i)=>(
+                <button key={i} onClick={()=>fillDemo(u)}
+                  className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl bg-slate-50 hover:bg-indigo-50 border border-slate-100 hover:border-indigo-200 transition-all text-left">
+                  <div className="flex items-center gap-3">
+                    <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-400 to-indigo-600 flex items-center justify-center text-white text-xs font-bold">
+                      {u.name[0]}
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold text-slate-700">{u.email}</p>
+                      <p className="text-xs text-slate-400">{u.role}</p>
+                    </div>
+                  </div>
+                  <span className="text-xs font-mono text-slate-400 bg-slate-100 px-2 py-0.5 rounded">{u.password}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {showForgot && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
+            <div className="login-card fu max-w-sm">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-xl font-bold text-slate-800">Reset Password</h3>
+                <button onClick={closeForgot} className="text-slate-400 hover:text-slate-600">
+                  <Ic n="x" cls="w-5 h-5"/>
+                </button>
+              </div>
+
+              {forgotErr && (
+                <div className="lerr mb-4">
+                  <Ic n="warning" cls="w-4 h-4 flex-shrink-0"/>
+                  {forgotErr}
+                </div>
+              )}
+
+              {forgotMsg && (
+                <div className="bg-emerald-50 border border-emerald-200 rounded-lg px-4 py-3 mb-4 text-sm text-emerald-700 flex items-start gap-2">
+                  <Ic n="check" cls="w-4 h-4 flex-shrink-0 mt-0.5"/>
+                  <span>{forgotMsg}</span>
+                </div>
+              )}
+
+              <form onSubmit={handleForgotSubmit} className="space-y-4">
+                {forgotStep === "email" && (
+                  <div>
+                    <label className="lfl">Email or Phone Number</label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+                        <Ic n="mail" cls="w-4 h-4"/>
+                      </span>
+                      <input type="text" className="lfi pl-10"
+                        placeholder="admin@churnguard.ai or +919876543210"
+                        value={forgotCred} onChange={e=>{setForgotCred(e.target.value);setForgotErr("")}} required/>
+                    </div>
+                    <p className="text-xs text-slate-400 mt-2">We'll send you a reset code via email or SMS.</p>
+                  </div>
+                )}
+
+                {forgotStep === "code" && (
+                  <div>
+                    <label className="lfl">Reset Code</label>
+                    <input type="text" className="lfi text-center text-2xl tracking-widest"
+                      placeholder="000000" maxLength="6"
+                      value={resetCode} onChange={e=>{setResetCode(e.target.value.replace(/\D/g,''));setForgotErr("")}} required/>
+                    <p className="text-xs text-slate-400 mt-2">Enter the 6-digit code sent to your email or phone.</p>
+                  </div>
+                )}
+
+                {forgotStep === "reset" && (
+                  <div>
+                    <label className="lfl">New Password</label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+                        <Ic n="lock" cls="w-4 h-4"/>
+                      </span>
+                      <input type="password" className="lfi pl-10"
+                        placeholder="Enter new password"
+                        value={newPw} onChange={e=>{setNewPw(e.target.value);setForgotErr("")}} required/>
+                    </div>
+                    <p className="text-xs text-slate-400 mt-2">Minimum 6 characters required.</p>
+                  </div>
+                )}
+
+                <button type="submit"
+                  className="w-full py-2.5 rounded-xl text-white font-bold text-sm flex items-center justify-center gap-2 transition-all"
+                  style={{background:"linear-gradient(135deg,#6366f1,#4f46e5)"}}>
+                  {forgotStep === "email" && "Send Reset Code"}
+                  {forgotStep === "code" && "Verify Code"}
+                  {forgotStep === "reset" && "Reset Password"}
+                </button>
+
+                <button type="button" onClick={closeForgot}
+                  className="w-full py-2 rounded-xl border border-slate-200 text-slate-600 font-semibold text-sm hover:bg-slate-50">
+                  Cancel
+                </button>
+              </form>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   DASHBOARD COMPONENTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+const KPI=({label,val,sub,up,icon,bg,delay=0})=>(
+  <div className="card fu p-5 flex flex-col gap-3 hover:shadow-lg transition-shadow" style={{animationDelay:`${delay}ms`}}>
+    <div className="flex items-center justify-between">
+      <span className="text-xs font-semibold text-slate-400 uppercase tracking-wide">{label}</span>
+      <span className={`w-9 h-9 rounded-xl flex items-center justify-center ${bg}`}><Ic n={icon} cls="w-5 h-5 text-white"/></span>
+    </div>
+    <div className="flex items-end gap-2">
+      <span className="text-2xl font-bold text-slate-800 leading-none">{val}</span>
+      {sub&&<span className={`flex items-center gap-0.5 text-xs font-semibold mb-0.5 ${up?"text-emerald-500":"text-red-500"}`}><Ic n={up?"up":"down"} cls="w-3 h-3"/>{sub}</span>}
+    </div>
+  </div>
+);
+
+const useChart=(id,mkCfg,deps)=>{
+  const ref=useRef(null);
+  useEffect(()=>{
+    const el=document.getElementById(id);
+    if(!el)return;
+    if(ref.current)ref.current.destroy();
+    ref.current=new Chart(el,mkCfg());
+    return()=>{try{ref.current.destroy();}catch(e){}};
+  },deps);
+};
+
+const LineChart=({id,labels,data,color="#3b82f6"})=>{
+  useChart(id,()=>({type:"line",data:{labels,datasets:[{data,borderColor:color,backgroundColor:color+"15",fill:true,tension:0.45,borderWidth:2.5,pointRadius:4,pointHoverRadius:6,pointBackgroundColor:color}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:"#0f172a",cornerRadius:8,padding:10}},scales:{x:{grid:{display:false},ticks:{font:{size:10},color:"#94a3b8"}},y:{grid:{color:"rgba(255,255,255,0.08)"},ticks:{font:{size:10},color:"#94a3b8"},beginAtZero:true}}}}),[id,JSON.stringify(data),color]);
+  return <div style={{height:180}}><canvas id={id}/></div>;
+};
+
+const DonutChart=({id="dc",high=30,med=45,low=25})=>{
+  useChart(id,()=>({type:"doughnut",data:{labels:["High Risk","Medium Risk","Low Risk"],datasets:[{data:[high,med,low],backgroundColor:["#ef4444","#f59e0b","#10b981"],borderWidth:0,hoverOffset:6}]},options:{responsive:true,maintainAspectRatio:false,cutout:"70%",plugins:{legend:{position:"bottom",labels:{font:{size:11},color:"#94a3b8",padding:12,boxWidth:10,usePointStyle:true,pointStyle:"circle"}},tooltip:{backgroundColor:"#0f172a",cornerRadius:8,padding:10}}}}),[id,high,med,low]);
+  return <div style={{height:200}}><canvas id={id}/></div>;
+};
+
+const HBarChart=({id="bc",featureImp})=>{
+  const defL=["Age","Tenure","Purch.Freq","Spent","Avg Order","Days Since","Membership","Support"];
+  const defV=[12,18,15,22,10,14,5,14];
+  const labels=featureImp?Object.keys(featureImp):defL;
+  const vals=featureImp?Object.values(featureImp):defV;
+  useChart(id,()=>({type:"bar",data:{labels,datasets:[{label:"Importance %",data:vals,backgroundColor:labels.map((_,i)=>`hsla(${210+i*15},70%,${55+i*3}%,0.85)`),borderRadius:6,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:"y",plugins:{legend:{display:false},tooltip:{backgroundColor:"#0f172a",cornerRadius:8,padding:10}},scales:{x:{grid:{color:"rgba(255,255,255,0.08)"},ticks:{font:{size:10},color:"#94a3b8"}},y:{grid:{display:false},ticks:{font:{size:10},color:"#94a3b8"}}}}}),[id,JSON.stringify(featureImp)]);
+  return <div style={{height:220}}><canvas id={id}/></div>;
+};
+
+const Gauge=({prob})=>{
+  const pct=Math.round(prob*100);
+  const color=prob>=0.75?"#ef4444":prob>=0.45?"#f59e0b":"#10b981";
+  return(<div><div className="flex justify-between text-xs text-slate-400 mb-1.5"><span>0%</span><span>Churn Probability</span><span>100%</span></div><div className="pb"><div className="pf" style={{width:`${pct}%`,background:color}}/></div><div className="text-center mt-2"><span className="text-2xl font-bold" style={{color}}>{pct}%</span></div></div>);
+};
+
+const Empty=({icon,title,sub})=>(
+  <div className="flex flex-col items-center py-12 text-slate-300">
+    <Ic n={icon} cls="w-12 h-12 mb-3"/>
+    <p className="font-medium text-slate-400">{title}</p>
+    {sub&&<p className="text-sm text-slate-300 mt-1">{sub}</p>}
+  </div>
+);
+
+// ── ROC Curve Chart (New) ──
+const ROCChart=({id="roc-chart", fpr, tpr})=>{
+  const data = (fpr || []).map((x, i) => ({x: x, y: tpr[i]}));
+  useChart(id,()=>({
+    type:"line",
+    data:{
+      datasets:[
+        {
+          label: "ROC Curve",
+          data: data,
+          borderColor: "#6366f1",
+          borderWidth: 3,
+          pointRadius: 0,
+          showLine: true,
+          fill: false,
+          tension: 0.1
+        },
+        {
+          label: "Random Guess",
+          data: [{x:0, y:0}, {x:1, y:1}],
+          borderColor: "#94a3b8",
+          borderWidth: 1.5,
+          borderDash: [5, 5],
+          pointRadius: 0,
+          showLine: true,
+          fill: false
+        }
+      ]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      plugins:{
+        legend:{display:false},
+        tooltip:{backgroundColor:"#0f172a",cornerRadius:8,padding:10}
+      },
+      scales:{
+        x:{
+          type: 'linear',
+          position: 'bottom',
+          min: 0,
+          max: 1,
+          title: {display: true, text: 'False Positive Rate', color: '#94a3b8', font: {size: 10}},
+          grid:{color:"rgba(255,255,255,0.08)"},
+          ticks:{color:"#94a3b8", font:{size: 9}}
+        },
+        y:{
+          min: 0,
+          max: 1,
+          title: {display: true, text: 'True Positive Rate', color: '#94a3b8', font: {size: 10}},
+          grid:{color:"rgba(255,255,255,0.08)"},
+          ticks:{color:"#94a3b8", font:{size: 9}}
+        }
+      }
+    }
+  }),[id, JSON.stringify(fpr), JSON.stringify(tpr)]);
+  return <div style={{height:220}}><canvas id={id}/></div>;
+};
+
+// ── Probability Distribution Histogram Chart (New) ──
+const HistChart=({id="hist-chart", bins, stay, churn})=>{
+  useChart(id,()=>({
+    type:"bar",
+    data:{
+      labels: bins || [],
+      datasets:[
+        {
+          label: "Will Stay",
+          data: stay || [],
+          backgroundColor: "rgba(16, 185, 129, 0.75)",
+          borderRadius: 4
+        },
+        {
+          label: "Will Churn",
+          data: churn || [],
+          backgroundColor: "rgba(239, 68, 68, 0.75)",
+          borderRadius: 4
+        }
+      ]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      plugins:{
+        legend:{position:"top",labels:{font:{size:10},color:"#94a3b8",boxWidth:12}},
+        tooltip:{backgroundColor:"#0f172a",cornerRadius:8,padding:10}
+      },
+      scales:{
+        x:{
+          stacked: true,
+          grid:{display:false},
+          ticks:{font:{size:8},color:"#94a3b8",maxRotation:45,minRotation:45}
+        },
+        y:{
+          stacked: true,
+          grid:{color:"rgba(255,255,255,0.08)"},
+          ticks:{font:{size:9},color:"#94a3b8"}
+        }
+      }
+    }
+  }),[id, JSON.stringify(bins), JSON.stringify(stay), JSON.stringify(churn)]);
+  return <div style={{height:220}}><canvas id={id}/></div>;
+};
+
+/* ── Sidebar ── */
+const NAV=[
+  {id:"dashboard",label:"Dashboard",icon:"dashboard"},
+  {id:"predict",label:"Predict Churn",icon:"predict"},
+  {id:"analytics",label:"Analytics",icon:"analytics"},
+  {id:"customers",label:"Customers",icon:"customers"},
+  {id:"history",label:"History",icon:"history"},
+  {id:"about",label:"About",icon:"about"}
+];
+const Sidebar=({page,setPage,col,setCol})=>(
+  <aside className={`fixed top-0 left-0 h-full bg-slate-900 border-r border-slate-800 z-50 flex flex-col transition-all duration-300 ${col?"w-16":"w-56"}`}>
+    <div className="flex items-center gap-2.5 px-4 py-5 border-b border-slate-800/60">
+      <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center flex-shrink-0"><Ic n="shield" cls="w-4 h-4 text-white"/></div>
+      {!col&&<span className="font-bold text-slate-100 text-sm">ChurnGuard <span className="text-indigo-400">AI</span></span>}
+      <button onClick={()=>setCol(!col)} className="ml-auto text-slate-400 hover:text-indigo-400 transition-colors"><Ic n={col?"cr":"x"} cls="w-4 h-4"/></button>
+    </div>
+    <nav className="flex-1 py-4 px-2 flex flex-col gap-1 overflow-y-auto">
+      {NAV.map(n=>(
+        <button key={n.id} onClick={()=>setPage(n.id)} className={`sl ${page===n.id?"active":""} ${col?"justify-center px-0":""}`} title={col?n.label:""}>
+          <Ic n={n.icon} cls={`w-[18px] h-[18px] flex-shrink-0 ${page===n.id?"text-indigo-400":"text-slate-400"}`}/>
+          {!col&&<span>{n.label}</span>}
+        </button>
+      ))}
+    </nav>
+    {!col&&<div className="p-4 border-t border-slate-800/60"><div className="bg-indigo-950/20 border border-indigo-900/30 rounded-xl p-3"><div className="flex items-center gap-2 mb-1"><span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span><span className="text-xs font-semibold text-slate-300">Model Online</span></div><p className="text-xs text-slate-500">RF + XGBoost Ensemble</p></div></div>}
+  </aside>
+);
+
+/* ── Navbar ── */
+const PT={dashboard:"Dashboard",predict:"Predict Churn",batch:"Batch Churn Prediction",analytics:"Model Analytics & Performance",customers:"Customers",history:"Prediction History",about:"About Project"};
+const Navbar=({page,online,user,searchQuery,onSearchChange,onLogoutClick})=>(
+  <header className="bg-slate-900 border-b border-slate-800 px-6 py-3.5 flex items-center justify-between sticky top-0 z-40">
+    <div>
+      <h1 className="text-base font-bold text-slate-100">{PT[page]}</h1>
+      <p className="text-xs text-slate-400">AI-powered churn analysis · RF + XGBoost</p>
+    </div>
+    <div className="flex items-center gap-3">
+      <div className="hidden md:flex items-center gap-2 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2">
+        <Ic n="search" cls="w-4 h-4 text-slate-400"/>
+        <input value={searchQuery} onChange={e=>onSearchChange(e.target.value)} className="bg-transparent text-sm outline-none text-slate-200 w-36 placeholder-slate-400" placeholder="Search customers or history..."/>
+      </div>
+      <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold ${online?"bg-emerald-950/30 text-emerald-400 border border-emerald-900/30":"bg-red-950/30 text-red-400 border border-red-900/30"}`}>
+        <span className={`w-1.5 h-1.5 rounded-full ${online?"bg-emerald-500 animate-pulse":"bg-red-500"}`}></span>
+        {online?"API Live":"API Offline"}
+      </div>
+      <div className="flex items-center gap-2">
+        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center text-white text-sm font-bold">{(user?.name||user?.email||"A")[0]}</div>
+        <div className="hidden md:block">
+          <p className="text-xs font-semibold text-slate-200 leading-none">{user?.name||user?.email||"Admin"}</p>
+          <p className="text-xs text-slate-400">{user?.role||"Administrator"}</p>
+        </div>
+        <button onClick={onLogoutClick} title="Logout" className="w-8 h-8 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-center text-slate-400 hover:text-red-450 hover:bg-red-950/20 transition-all ml-1">
+          <Ic n="logout" cls="w-4 h-4"/>
+        </button>
+      </div>
+    </div>
+  </header>
+);
+
+/* ── Dashboard Page ── */
+const DashPage=({stats,hist,fiData,setPage})=>{
+  const recent=[...(hist||[])].reverse().slice(0,5);
+  const high=(hist||[]).filter(h=>h.risk==="High").length;
+  const med=(hist||[]).filter(h=>h.risk==="Medium").length;
+  const low=(hist||[]).filter(h=>h.risk==="Low").length;
+  return(
+    <div className="space-y-6 fu">
+      <div className="flex items-center justify-between">
+        <div><h2 className="text-xl font-bold text-slate-800">Welcome back!</h2><p className="text-sm text-slate-400">Here is what is happening with your customers today.</p></div>
+        <button onClick={()=>setPage("predict")} className="flex items-center gap-2 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors" style={{background:"linear-gradient(135deg,#6366f1,#4f46e5)",boxShadow:"0 4px 20px rgba(99,102,241,0.3)"}}>
+          <Ic n="predict" cls="w-4 h-4"/>New Prediction
+        </button>
+      </div>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <KPI label="Total Customers" val={(stats?.total_customers||12847).toLocaleString()} sub="+2.1%" up icon="users"   bg="bg-blue-600"    delay={0}/>
+        <KPI label="Churn Rate"      val={`${stats?.churn_rate||24.5}%`}                    sub="-1.2%"    icon="warning" bg="bg-red-500"     delay={60}/>
+        <KPI label="Retained"        val={(stats?.retained||9699).toLocaleString()}           sub="+3.4%" up icon="shield"  bg="bg-emerald-500" delay={120}/>
+        <KPI label="Avg Revenue"     val={`$${stats?.avg_revenue||68.40}`}                   sub="+7.8%" up icon="money"   bg="bg-amber-500"   delay={180}/>
+      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="lg:col-span-2 card p-5">
+          <div className="flex items-center justify-between mb-4">
+            <div><p className="text-xs font-semibold text-slate-400 uppercase tracking-wide">Churn Trend</p><p className="text-lg font-bold text-slate-800">Monthly Risk Overview</p></div>
+            <span className="badge bg-blue-50 text-blue-600">Last 7 months</span>
+          </div>
+          <LineChart id="lc1" labels={["Jan","Feb","Mar","Apr","May","Jun","Jul"]} data={[22,28,24,31,26,29,24]}/>
+        </div>
+        <div className="card p-5">
+          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">Risk Distribution</p>
+          <p className="text-lg font-bold text-slate-800 mb-3">Churn Segments</p>
+          <DonutChart id="dc1" high={high||30} med={med||45} low={low||25}/>
+        </div>
+      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="card p-5">
+          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">Model Insights</p>
+          <p className="text-lg font-bold text-slate-800 mb-3">Feature Importance</p>
+          <HBarChart id="bc1" featureImp={fiData?.feature_importance||null}/>
+        </div>
+        <div className="lg:col-span-2 card p-5">
+          <div className="flex items-center justify-between mb-4">
+            <div><p className="text-xs font-semibold text-slate-400 uppercase tracking-wide">Latest Activity</p><p className="text-lg font-bold text-slate-800">Recent Predictions</p></div>
+            <button onClick={()=>setPage("history")} className="text-xs font-semibold text-indigo-600 flex items-center gap-1 hover:text-indigo-700">See all <Ic n="cr" cls="w-3 h-3"/></button>
+          </div>
+          {recent.length===0?<Empty icon="history" title="No predictions yet" sub="Click New Prediction to get started"/>:(
+            <div className="overflow-x-auto"><table className="w-full text-sm"><thead><tr className="border-b border-slate-100">{["Customer ID","Contract","Tenure","Risk","Date"].map(h=><th key={h} className="text-left text-xs font-semibold text-slate-400 pb-2 pr-4 whitespace-nowrap">{h}</th>)}</tr></thead>
+            <tbody>{recent.map((r,i)=><tr key={i} className="border-b border-slate-50 hover:bg-indigo-50/30 transition-colors"><td className="py-2.5 pr-4 font-medium text-slate-700">{r.id}</td><td className="py-2.5 pr-4"><Badge text={(r.contract||"Silver").split(" ")[0]}/></td><td className="py-2.5 pr-4 text-slate-400">{r.tenure} mo</td><td className="py-2.5 pr-4"><Badge text={r.risk}/></td><td className="py-2.5 text-slate-400 text-xs">{r.date}</td></tr>)}</tbody></table></div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/* ── Predict Page ── */
+// Standalone form input helper to avoid focus loss
+const F=({label,k,form,set,type="text",...rest})=>{
+  const handleKeyDown=(e)=>{
+    if(e.key==="Enter"&&type!=="number"){
+      e.preventDefault();
+      const inputs=document.querySelectorAll(".fi");
+      const current=Array.from(inputs).indexOf(e.target);
+      if(current<inputs.length-1)inputs[current+1].focus();
+    }
+  };
+  return(
+    <div>
+      <label className="fl">{label}</label>
+      <input 
+        type={type} 
+        className="fi" 
+        value={form[k]} 
+        onChange={e=>set(k,type==="number"?+e.target.value:e.target.value)} 
+        autoComplete="off" 
+        spellCheck="false" 
+        onKeyDown={handleKeyDown} 
+        {...rest}
+      />
+    </div>
+  );
+};
+
+/* ── Predict Page ── */
+const PredPage=({onDone, user})=>{
+  const [form,setForm]=useState({customer_id:"",name:"",age:35,tenure:12,purchase_freq:8,total_spent:450,avg_order:56,days_since:90,membership:"Silver",support_calls:2});
+  const [result,setResult]=useState(null);
+  const [loading,setLoading]=useState(false);
+  const [err,setErr]=useState("");
+  const [showRec,setShowRec]=useState(false);
+  
+  // Recommendation Modal states
+  const [showRecModal, setShowRecModal] = useState(false);
+  const [recMethod, setRecMethod] = useState("email"); // "email" | "sms"
+  const [recInput, setRecInput] = useState("");
+  const [recLoading, setRecLoading] = useState(false);
+  const [recSentData, setRecSentData] = useState(null);
+
+  // SMTP Settings
+  const [sendReal, setSendReal] = useState(() => localStorage.getItem("cg_smtp_send_real") === "true");
+  const [senderEmail, setSenderEmail] = useState(() => localStorage.getItem("cg_smtp_sender_email") || "");
+  const [senderPassword, setSenderPassword] = useState(() => localStorage.getItem("cg_smtp_sender_password") || "");
+
+  const set=(k,v)=>setForm(p=>({...p,[k]:v}));
+  
+  const submit=async()=>{
+    setLoading(true);setErr("");setResult(null);
+    try{
+      const r=await apiPost("/predict", {...form, user_email: user?.email});
+      if(r.error)throw new Error(r.error);
+      setResult(r);
+      
+      // Save to user prediction history in localStorage as backup
+      if(user && user.email){
+        const key=`pred_hist_${user.email}`;
+        const existing=JSON.parse(localStorage.getItem(key)||"[]");
+        const prediction={
+          id:form.customer_id||`C-${Date.now()}`,
+          name:form.name,
+          churn_prob:r.churn_prob,
+          risk_level:r.risk_level,
+          confidence:r.confidence,
+          contract:form.membership,
+          tenure:form.tenure,
+          mc:form.avg_order,
+          date:new Date().toLocaleDateString("en-IN"),
+          timestamp:Date.now(),
+          will_churn:r.will_churn,
+          insights:r.insights||[]
+        };
+        existing.push(prediction);
+        localStorage.setItem(key,JSON.stringify(existing));
+      }
+      
+      onDone&&onDone();
+    }catch(e){
+      setErr(e.message||"Prediction failed.");
+    }finally{
+      setLoading(false);
+    }
+  };
+
+  const handleSendRec = async () => {
+    if(!recInput) return;
+    setRecLoading(true);
+    try {
+      const payload = {
+        method: recMethod,
+        recipient: recInput,
+        customer_name: form.name || "Valued Customer"
+      };
+      if(sendReal && recMethod === "email") {
+        payload.sender_email = senderEmail;
+        payload.sender_password = senderPassword;
+        localStorage.setItem("cg_smtp_send_real", "true");
+        localStorage.setItem("cg_smtp_sender_email", senderEmail);
+        localStorage.setItem("cg_smtp_sender_password", senderPassword);
+      } else {
+        localStorage.setItem("cg_smtp_send_real", "false");
+      }
+      const response = await apiPost("/send-recommendation", payload);
+      if(response.error) throw new Error(response.error);
+      setRecSentData(response.details);
+    } catch(e) {
+      alert("Failed to send: " + e.message);
+    } finally {
+      setRecLoading(false);
+    }
+  };
+
+  const RC={High:"text-red-650 bg-red-950/20 border border-red-900/30",Medium:"text-amber-650 bg-amber-950/20 border border-amber-900/30",Low:"text-emerald-650 bg-emerald-950/20 border border-emerald-900/30"};
+  
+  const getRecommendations=(result)=>{
+    const recs=[];
+    if(result.risk_level==="High"){
+      recs.push("⚠️ Schedule retention call within 48 hours");
+      recs.push("🎁 Offer personalized loyalty incentives or discounts");
+      recs.push("📞 Assign dedicated customer success manager");
+    }
+    if(result.insights?.some(i=>i.includes("Purchase frequency"))){
+      recs.push("📊 Create engagement campaign to increase purchase frequency");
+      recs.push("💌 Send product recommendations and special offers");
+    }
+    if(result.insights?.some(i=>i.includes("support call"))){
+      recs.push("👂 Review support ticket history for satisfaction issues");
+      recs.push("✉️ Proactively reach out to address support concerns");
+    }
+    if(result.insights?.some(i=>i.includes("spending"))){
+      recs.push("💰 Create tiered discount strategy for increased spending");
+      recs.push("🎯 Bundle products to increase average order value");
+    }
+    if(result.insights?.some(i=>i.includes("New customer"))){
+      recs.push("🎉 Enhance onboarding experience with personalized intro call");
+      recs.push("📖 Provide product training and best practices guide");
+    }
+    if(recs.length===0){
+      recs.push("✅ Maintain regular touchpoints");
+      recs.push("📈 Monitor for any negative signals");
+      recs.push("🤝 Continue excellent customer service");
+    }
+    return recs;
+  };
+  
+  return(
+    <div className="fu max-w-5xl mx-auto">
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+        <div className="lg:col-span-3 card p-6">
+          <h2 className="text-lg font-bold text-slate-100 mb-1">Customer Profile</h2>
+          <p className="text-sm text-slate-400 mb-5">Fill in the details to get an AI churn prediction.</p>
+          <div className="grid grid-cols-2 gap-4">
+            <F label="Customer ID" k="customer_id" form={form} set={set} placeholder="C-1001"/>
+            <F label="Name" k="name" form={form} set={set} placeholder="John Doe"/>
+            <F label="Age" k="age" form={form} set={set} type="number" min={18} max={100}/>
+            <F label="Tenure (Months)" k="tenure" form={form} set={set} type="number" min={0}/>
+            <F label="Purchase Frequency/yr" k="purchase_freq" form={form} set={set} type="number" min={0}/>
+            <F label="Total Spent ($)" k="total_spent" form={form} set={set} type="number" min={0} step="10"/>
+            <F label="Avg Order Value ($)" k="avg_order" form={form} set={set} type="number" min={0} step="5"/>
+            <F label="Days Since Purchase" k="days_since" form={form} set={set} type="number" min={0} max={365}/>
+            <div><label className="fl">Membership Tier</label><select className="fi" value={form.membership} onChange={e=>set("membership",e.target.value)} autoComplete="off"><option>Bronze</option><option>Silver</option><option>Gold</option></select></div>
+            <F label="Support Calls" k="support_calls" form={form} set={set} type="number" min={0} max={30}/>
+          </div>
+          {err&&<div className="mt-4 flex items-start gap-2 bg-red-955/20 border border-red-900/30 rounded-xl p-3 text-sm text-red-400"><Ic n="warning" cls="w-4 h-4 mt-0.5 flex-shrink-0"/>{err}</div>}
+          <button onClick={submit} disabled={loading} className="mt-5 w-full flex items-center justify-center gap-2 text-white font-semibold py-3 rounded-xl transition-colors hover:opacity-90" style={{background:"linear-gradient(135deg,#6366f1,#4f46e5)",boxShadow:"0 4px 20px rgba(99,102,241,0.3)"}}>
+            {loading?<><span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full spin"/>Predicting...</>:<><Ic n="predict" cls="w-4 h-4"/>Predict Churn</>}
+          </button>
+        </div>
+        <div className="lg:col-span-2 space-y-4">
+          {result?(
+            <><div className={`card p-5 border-l-4 ${result.churn_label?"border-red-500":"border-emerald-500"}`}>
+              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2">Prediction Result</p>
+              <div className="flex items-center gap-3 mb-4"><span className="text-3xl">{result.churn_label?"🔴":"🟢"}</span><div><p className="font-bold text-slate-100 text-lg leading-tight">{result.will_churn}</p><p className="text-xs text-slate-400">Customer #{result.customer_id||"—"}</p></div></div>
+              <Gauge prob={result.churn_prob}/>
+              <div className="grid grid-cols-2 gap-3 mt-4">
+                <div className="bg-slate-950 rounded-xl p-3 text-center border border-slate-850"><p className="text-xs text-slate-400 mb-1">Risk Level</p><span className={`badge ${RC[result.risk_level]||"bg-blue-950/20 text-blue-400"}`}>{result.risk_level}</span></div>
+                <div className="bg-slate-950 rounded-xl p-3 text-center border border-slate-850"><p className="text-xs text-slate-400 mb-1">Confidence</p><p className="font-bold text-slate-100 text-lg">{result.confidence}%</p></div>
+              </div>
+              
+              {result.churn_label && (
+                <button 
+                  onClick={() => { setShowRecModal(true); setRecSentData(null); setRecInput(form.name ? `${form.name.toLowerCase().replace(/\s+/g, '')}@example.com` : ''); }} 
+                  className="w-full mt-4 flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold py-3 rounded-xl hover:from-indigo-600 hover:to-purple-700 hover:shadow-lg transition-all"
+                >
+                  <Ic n="mail" cls="w-4 h-4"/> Send Recommendation
+                </button>
+              )}
+            </div>
+            <div className="card p-5">
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide">AI Insights</p>
+                <button onClick={()=>setShowRec(!showRec)} className="text-xs font-semibold text-indigo-400 hover:text-indigo-300 flex items-center gap-1">
+                  <Ic n={showRec?"x":"spark"} cls="w-3 h-3"/> {showRec?"Hide":"Recommendations"}
+                </button>
+              </div>
+              {showRec?(
+                <ul className="space-y-2">
+                  {getRecommendations(result).map((rec,i)=>(
+                    <li key={i} className="flex items-start gap-2 text-xs text-slate-300 bg-indigo-950/20 border border-indigo-900/10 p-2 rounded-lg">
+                      <span className="flex-shrink-0 mt-0.5">→</span>
+                      <span>{rec}</span>
+                    </li>
+                  ))}
+                </ul>
+              ):(
+                <ul className="space-y-2">
+                  {(result.insights||[]).map((ins,i)=><li key={i} className="flex items-start gap-2 text-sm text-slate-300"><Ic n="cr" cls="w-3.5 h-3.5 mt-0.5 text-indigo-400 flex-shrink-0"/>{ins}</li>)}
+                </ul>
+              )}
+            </div></>
+          ):(
+            <div className="card p-8 flex flex-col items-center justify-center text-center" style={{minHeight:260}}>
+              <div className="w-14 h-14 rounded-2xl bg-slate-950 border border-slate-850 flex items-center justify-center mb-4"><Ic n="predict" cls="w-7 h-7 text-indigo-500"/></div>
+              <p className="font-semibold text-slate-350 mb-1">No result yet</p>
+              <p className="text-sm text-slate-500">Fill the form and click Predict Churn.</p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Recommendation dispatch overlay modal */}
+      {showRecModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
+          <div className="w-full max-w-lg rounded-2xl bg-slate-900 border border-slate-800 p-6 shadow-2xl relative">
+            <button onClick={() => setShowRecModal(false)} className="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors">
+              <Ic n="x" cls="w-5 h-5"/>
+            </button>
+            
+            {!recSentData ? (
+              <>
+                <h3 className="text-lg font-bold text-slate-100 mb-1 flex items-center gap-2">
+                  <span className="p-1.5 rounded-lg bg-indigo-500/10 text-indigo-400"><Ic n="mail" cls="w-5 h-5"/></span>
+                  Send Churn Prevention Offer
+                </h3>
+                <p className="text-xs text-slate-400 mb-5">Choose channel and recipient to send customized loyalty retention deals.</p>
+                
+                {/* Channel Selector */}
+                <div className="grid grid-cols-2 gap-2 mb-5 bg-slate-950 p-1 rounded-xl border border-slate-850">
+                  <button 
+                    onClick={() => { setRecMethod("email"); setRecInput(form.name ? `${form.name.toLowerCase().replace(/\s+/g, '')}@example.com` : ''); }} 
+                    className={`flex items-center justify-center gap-2 py-2 text-xs font-semibold rounded-lg transition-all ${recMethod === "email" ? "bg-indigo-600 text-white shadow-sm" : "text-slate-400 hover:text-slate-200"}`}
+                  >
+                    <Ic n="mail" cls="w-4 h-4"/> Email Address
+                  </button>
+                  <button 
+                    onClick={() => { setRecMethod("sms"); setRecInput("9493392395"); }} 
+                    className={`flex items-center justify-center gap-2 py-2 text-xs font-semibold rounded-lg transition-all ${recMethod === "sms" ? "bg-indigo-600 text-white shadow-sm" : "text-slate-400 hover:text-slate-200"}`}
+                  >
+                    <Ic n="phone" cls="w-4 h-4"/> SMS Number
+                  </button>
+                </div>
+                
+                {/* Input Details */}
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1.5 block">
+                      {recMethod === "email" ? "Recipient Email" : "Recipient Phone Number"}
+                    </label>
+                    <input 
+                      type="text" 
+                      value={recInput} 
+                      onChange={e => setRecInput(e.target.value)} 
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl py-3 px-4 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 transition-colors"
+                      placeholder={recMethod === "email" ? "e.g. name@email.com" : "e.g. +91 9493392395"}
+                    />
+                  </div>
+                  
+                  {recMethod === "email" && (
+                    <div className="border border-slate-800 bg-slate-950/40 rounded-xl p-3 space-y-3">
+                      <label className="flex items-center gap-2 text-xs font-semibold text-slate-300 cursor-pointer">
+                        <input 
+                          type="checkbox" 
+                          checked={sendReal} 
+                          onChange={e => setSendReal(e.target.checked)} 
+                          className="rounded text-indigo-600 focus:ring-indigo-500 bg-slate-900 border-slate-850"
+                        />
+                        Send real email (via Gmail SMTP)
+                      </label>
+                      
+                      {sendReal && (
+                        <div className="space-y-2.5 pt-1.5 border-t border-slate-850">
+                          <div>
+                            <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wide block mb-1">Your Gmail Address</label>
+                            <input 
+                              type="email" 
+                              value={senderEmail} 
+                              onChange={e => setSenderEmail(e.target.value)} 
+                              className="w-full bg-slate-950 border border-slate-800 rounded-lg py-2 px-3 text-xs text-slate-100 focus:outline-none focus:border-indigo-500"
+                              placeholder="e.g. sender@gmail.com"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wide block mb-1 flex items-center justify-between">
+                              <span>Gmail App Password (16-char)</span>
+                              <a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:underline">How to generate?</a>
+                            </label>
+                            <input 
+                              type="password" 
+                              value={senderPassword} 
+                              onChange={e => setSenderPassword(e.target.value)} 
+                              className="w-full bg-slate-950 border border-slate-800 rounded-lg py-2 px-3 text-xs text-slate-100 focus:outline-none focus:border-indigo-500"
+                              placeholder="e.g. abcd efgh ijkl mnop"
+                            />
+                          </div>
+                          <p className="text-[9px] text-slate-500 leading-normal">
+                            🔒 Credentials are saved in your local browser storage and used securely on your local API server. Gmail requires a 16-character App Password, not your standard account password.
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  
+                  {/* Live preview */}
+                  <div className="bg-slate-950 border border-slate-850 rounded-xl p-4 text-xs">
+                    <p className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider mb-2">Exclusive Offer Message Preview</p>
+                    <p className="text-slate-300 leading-relaxed italic">
+                      {recMethod === "email" 
+                        ? `Hi ${form.name || "Customer"}, we noticed you bought a premium Shirt recently. Get 40% OFF shirts & fashion on Amazon with code SHIRTLOVE...`
+                        : `Hi ${form.name || "Customer"}! We miss you. Get 40% OFF shirts on Amazon with code SHIRTLOVE. Use code: SHIRTLOVE`
+                      }
+                    </p>
+                  </div>
+                </div>
+                
+                {/* Actions */}
+                <div className="mt-6 flex gap-3">
+                  <button onClick={() => setShowRecModal(false)} className="flex-1 py-3 border border-slate-800 hover:bg-slate-850 rounded-xl text-sm font-semibold text-slate-350 transition-all">Cancel</button>
+                  <button onClick={handleSendRec} disabled={recLoading || !recInput} className="flex-1 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2">
+                    {recLoading ? <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full spin"/> Sending...</> : <><Ic n="check" cls="w-4 h-4"/> Send Offer</>}
+                  </button>
+                </div>
+              </>
+            ) : (
+              /* Success View */
+              <div className="text-center py-2">
+                <div className="w-12 h-12 rounded-full bg-emerald-500/10 text-emerald-400 flex items-center justify-center mx-auto mb-3">
+                  <Ic n="check" cls="w-6 h-6"/>
+                </div>
+                <h3 className="text-lg font-bold text-slate-100 mb-1">Dispatch Successful!</h3>
+                <p className="text-xs text-slate-400 mb-5">The recovery offer was sent to {recSentData.recipient} via {recSentData.method.toUpperCase()}.</p>
+                
+                {/* Receipt Client Mock */}
+                <div className="bg-slate-950 border border-slate-850 rounded-xl p-4 text-left font-mono text-[11px] text-slate-300 mb-6 overflow-y-auto max-h-56 select-all whitespace-pre-wrap">
+                  <div className="border-b border-slate-850 pb-2 mb-2">
+                    <p className="text-slate-500"><strong className="text-slate-405">TO:</strong> {recSentData.recipient}</p>
+                    <p className="text-slate-500"><strong className="text-slate-405">VIA:</strong> {recSentData.method.toUpperCase()}</p>
+                    <p className="text-slate-500"><strong className="text-slate-405">SENT:</strong> {new Date().toLocaleTimeString()}</p>
+                  </div>
+                  {recSentData.body}
+                </div>
+                
+                <button onClick={() => { setShowRecModal(false); setRecSentData(null); }} className="w-full py-3 bg-slate-800 hover:bg-slate-750 rounded-xl text-sm font-semibold text-slate-200 transition-all">Done</button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+/* ── Batch Prediction Page (New) ── */
+const BatchPage=()=>{
+  const [file, setFile] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [err, setErr] = useState("");
+  const [results, setResults] = useState(null);
+
+  const downloadSample=()=>{
+    const content = "Age,Tenure_Months,Purchase_Frequency,Total_Amount_Spent,Avg_Order_Value,Days_Since_Last_Purchase,Membership,Support_Calls\n" +
+      "45,3,2,80.0,40.0,280,Bronze,9\n" +
+      "28,24,15,920.0,61.3,20,Gold,1\n" +
+      "60,48,8,550.0,68.7,90,Silver,3\n" +
+      "33,6,3,110.0,36.6,240,Bronze,8\n";
+    const blob = new Blob([content], {type:"text/csv"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "sample_customers.csv";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
+
+  const onFileChange=(e)=>{
+    if(e.target.files.length > 0){
+      setFile(e.target.files[0]);
+      setErr("");
+    }
+  };
+
+  const uploadFile=async()=>{
+    if(!file) {
+      setErr("Please select a file first.");
+      return;
+    }
+    setLoading(true);
+    setErr("");
+    setResults(null);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/predict-batch", {
+        method: "POST",
+        body: formData
+      });
+      const data = await res.json();
+      if(!res.ok || data.error) {
+        throw new Error(data.error || "Batch prediction failed.");
+      }
+      setResults(data);
+    } catch(e) {
+      setErr(e.message || "Batch prediction failed.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const downloadResults=()=>{
+    if(!results || !results.csv) return;
+    const blob = new Blob([results.csv], {type:"text/csv"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "churn_predictions_results.csv";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
+
+  // Draw chart for probability distribution of results
+  useEffect(()=>{
+    if(!results) return;
+    const el = document.getElementById("batch-dist-chart");
+    if(!el) return;
+    const counts = Array(10).fill(0);
+    results.records.forEach(r => {
+      const idx = Math.min(9, Math.floor(r.Churn_Probability / 10));
+      counts[idx]++;
+    });
+    const labels = ["0-10%", "10-20%", "20-30%", "30-40%", "40-50%", "50-60%", "60-70%", "70-80%", "80-90%", "90-100%"];
+    const chart = new Chart(el, {
+      type: "bar",
+      data: {
+        labels: labels,
+        datasets: [{
+          label: "Customers",
+          data: counts,
+          backgroundColor: "rgba(99, 102, 241, 0.8)",
+          borderRadius: 5
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {display: false},
+          tooltip: {backgroundColor: "#1e293b", cornerRadius: 8}
+        },
+        scales: {
+          x: {grid: {display: false}, ticks: {color: "#94a3b8", font: {size: 10}}},
+          y: {grid: {color: "rgba(0,0,0,0.04)"}, ticks: {color: "#94a3b8", font: {size: 10}, beginAtZero: true}}
+        }
+      }
+    });
+    return () => chart.destroy();
+  }, [results]);
+
+  return (
+    <div className="space-y-6 fu">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-xl font-bold text-slate-800">📂 Batch Churn Prediction</h2>
+          <p className="text-sm text-slate-400">Score multiple customer profiles using a CSV file upload.</p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="card p-6 lg:col-span-1 space-y-5">
+          <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wide">Upload Dataset</h3>
+          
+          <div className="bg-slate-50 border border-dashed border-slate-300 rounded-2xl p-6 text-center flex flex-col items-center">
+            <Ic n="predict" cls="w-10 h-10 text-indigo-500 mb-3"/>
+            <p className="text-sm font-medium text-slate-700 mb-1">Select CSV file to score</p>
+            <p className="text-xs text-slate-400 mb-4">Required columns: Age, Tenure_Months, Purchase_Frequency, Total_Amount_Spent, Avg_Order_Value, Days_Since_Last_Purchase, Membership, Support_Calls</p>
+            
+            <input type="file" accept=".csv" onChange={onFileChange} className="hidden" id="csv-file-input"/>
+            <label htmlFor="csv-file-input" className="outline-btn px-4 py-2 rounded-xl text-xs font-semibold cursor-pointer border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 inline-block mb-3">
+              {file ? file.name : "Choose CSV File"}
+            </label>
+            
+            <button onClick={downloadSample} className="text-xs text-indigo-600 font-semibold hover:text-indigo-700 flex items-center gap-1">
+              <Ic n="down" cls="w-3.5 h-3.5"/> Download CSV Template
+            </button>
+          </div>
+
+          {err && <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-xs text-red-600">{err}</div>}
+
+          <button onClick={uploadFile} disabled={loading || !file} className="w-full flex items-center justify-center gap-2 text-white font-semibold py-3 rounded-xl transition-colors disabled:opacity-50" style={{background:"linear-gradient(135deg,#6366f1,#4f46e5)",boxShadow:"0 4px 20px rgba(99,102,241,0.3)"}}>
+            {loading ? <><span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full spin"/>Scoring...</> : <><Ic n="users" cls="w-4 h-4"/>Score Customers</>}
+          </button>
+        </div>
+
+        <div className="lg:col-span-2 space-y-6">
+          {results ? (
+            <div className="space-y-6">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <KPI label="Total Scored" val={results.summary.total} icon="users" bg="bg-blue-600"/>
+                <KPI label="Predicted Churners" val={results.summary.churners} icon="warning" bg="bg-red-500"/>
+                <KPI label="Churn Rate" val={`${results.summary.rate}%`} icon="trend" bg="bg-amber-500"/>
+                <KPI label="Avg Probability" val={`${results.summary.avg_prob}%`} icon="shield" bg="bg-emerald-500"/>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="card p-5">
+                  <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">Probability Distribution</p>
+                  <p className="text-lg font-bold text-slate-800 mb-3">Churn Probability Bins</p>
+                  <div style={{height:180}}><canvas id="batch-dist-chart"/></div>
+                </div>
+
+                <div className="card p-5 space-y-3">
+                  <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">Risk Breakdown</p>
+                  <p className="text-lg font-bold text-slate-800 mb-3">Risk Segments</p>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between p-2 bg-red-50 border border-red-200/50 rounded-xl">
+                      <span className="text-sm font-semibold text-red-700">🔴 High Risk</span>
+                      <span className="font-bold text-red-800 text-sm">{results.summary.high} customers</span>
+                    </div>
+                    <div className="flex items-center justify-between p-2 bg-amber-50 border border-amber-200/50 rounded-xl">
+                      <span className="text-sm font-semibold text-amber-700">🟡 Medium Risk</span>
+                      <span className="font-bold text-amber-800 text-sm">{results.summary.medium} customers</span>
+                    </div>
+                    <div className="flex items-center justify-between p-2 bg-emerald-50 border border-emerald-200/50 rounded-xl">
+                      <span className="text-sm font-semibold text-emerald-700">🟢 Low Risk</span>
+                      <span className="font-bold text-emerald-800 text-sm">{results.summary.low} customers</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="card p-5">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h3 className="text-base font-bold text-slate-800">📋 Scoring Results</h3>
+                    <p className="text-xs text-slate-400">List of all evaluated customer records</p>
+                  </div>
+                  <button onClick={downloadResults} className="flex items-center gap-1 text-white text-xs font-semibold px-3 py-2 rounded-lg hover:opacity-90" style={{background:"linear-gradient(135deg,#6366f1,#4f46e5)"}}>
+                    <Ic n="down" cls="w-3.5 h-3.5"/> Export Results CSV
+                  </button>
+                </div>
+                
+                <div className="overflow-x-auto max-h-96 overflow-y-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b-2 border-slate-100">
+                        {["#", "Age", "Tenure", "Spent", "Membership", "Support Calls", "Churn Prob", "Risk", "Prediction"].map(h=><th key={h} className="text-left text-xs font-semibold text-slate-400 pb-2 pr-3 whitespace-nowrap">{h}</th>)}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {results.records.map((r, i) => (
+                        <tr key={i} className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
+                          <td className="py-2 pr-3 text-slate-400 text-xs">{i+1}</td>
+                          <td className="py-2 pr-3 text-slate-700">{r.Age}</td>
+                          <td className="py-2 pr-3 text-slate-400">{r.Tenure_Months} mo</td>
+                          <td className="py-2 pr-3 text-slate-700">${r.Total_Amount_Spent}</td>
+                          <td className="py-2 pr-3"><Badge text={r.Membership}/></td>
+                          <td className="py-2 pr-3 text-slate-700">{r.Support_Calls}</td>
+                          <td className="py-2 pr-3 text-slate-700 font-semibold">{r.Churn_Probability}%</td>
+                          <td className="py-2 pr-3"><Badge text={r.Risk_Level}/></td>
+                          <td className="py-2"><span className={`px-2 py-0.5 rounded text-xs font-semibold ${r.Churn_Prediction === 1 ? "bg-red-100 text-red-800" : "bg-emerald-100 text-emerald-800"}`}>{r.Churn_Prediction === 1 ? "Will Churn" : "Will Stay"}</span></td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="card p-12 flex flex-col items-center justify-center text-center" style={{minHeight:360}}>
+              <div className="w-16 h-16 rounded-2xl bg-indigo-50 flex items-center justify-center mb-4"><Ic n="users" cls="w-8 h-8 text-indigo-500"/></div>
+              <p className="font-semibold text-slate-700 mb-1">Ready to score customers</p>
+              <p className="text-sm text-slate-400">Select a CSV file containing customer details and click **Score Customers**.</p>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/* ── Analytics Page ── */
+const AnalyticsPage=({stats,hist,fiData,analytics})=>{
+  const h=(hist||[]).filter(x=>x.risk==="High").length;
+  const m=(hist||[]).filter(x=>x.risk==="Medium").length;
+  const l=(hist||[]).filter(x=>x.risk==="Low").length;
+
+  return(<div className="space-y-6 fu">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <KPI label="Total Predictions" val={(hist||[]).length} sub="+12%" up icon="trend"   bg="bg-blue-600"    delay={0}/>
+      <KPI label="High Risk"         val={h}                 sub="risky"  icon="warning" bg="bg-red-500"     delay={60}/>
+      <KPI label="Medium Risk"       val={m}                 sub="watch" up icon="shield"  bg="bg-amber-500"   delay={120}/>
+      <KPI label="Low Risk"          val={l}                 sub="safe"  up icon="check"   bg="bg-emerald-500" delay={180}/>
+    </div>
+
+    {analytics ? (
+      <>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div className="card p-5">
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">Receiver Operating Characteristic</p>
+            <p className="text-lg font-bold text-slate-800 mb-3">ROC Curve (Test Set)</p>
+            <ROCChart id="roc-chart" fpr={analytics.fpr} tpr={analytics.tpr}/>
+          </div>
+          
+          <div className="card p-5 flex flex-col justify-between">
+            <div>
+              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">Model Performance</p>
+              <p className="text-lg font-bold text-slate-800 mb-3">Confusion Matrix (Test Set)</p>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-2 text-center max-w-sm mx-auto w-full my-auto">
+              <div className="bg-slate-100 text-slate-700 p-4 rounded-xl">
+                <div className="text-xs font-bold text-slate-400 mb-0.5">True Negative (TN)</div>
+                <div className="text-2xl font-black text-slate-800">{analytics.cm[0][0]}</div>
+                <div className="text-[10px] text-slate-400">Predicted Stay, Actual Stay</div>
+              </div>
+              <div className="bg-red-50 border border-red-200/50 text-red-700 p-4 rounded-xl">
+                <div className="text-xs font-bold text-red-400 mb-0.5">False Positive (FP)</div>
+                <div className="text-2xl font-black text-red-800">{analytics.cm[0][1]}</div>
+                <div className="text-[10px] text-red-400">Predicted Churn, Actual Stay</div>
+              </div>
+              <div className="bg-amber-50 border border-amber-200/50 text-amber-700 p-4 rounded-xl">
+                <div className="text-xs font-bold text-amber-400 mb-0.5">False Negative (FN)</div>
+                <div className="text-2xl font-black text-amber-800">{analytics.cm[1][0]}</div>
+                <div className="text-[10px] text-amber-400">Predicted Stay, Actual Churn</div>
+              </div>
+              <div className="bg-emerald-50 border border-emerald-200/50 text-emerald-700 p-4 rounded-xl">
+                <div className="text-xs font-bold text-emerald-400 mb-0.5">True Positive (TP)</div>
+                <div className="text-2xl font-black text-emerald-800">{analytics.cm[1][1]}</div>
+                <div className="text-[10px] text-emerald-400">Predicted Churn, Actual Churn</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div className="card p-5">
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">Risk Bins Overview</p>
+            <p className="text-lg font-bold text-slate-800 mb-3">Predicted Probability Distribution (Test Set)</p>
+            <HistChart id="hist-chart" bins={analytics.histogram.bins} stay={analytics.histogram.stay} churn={analytics.histogram.churn}/>
+          </div>
+          
+          <div className="card p-5">
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">Model Intelligence</p>
+            <p className="text-lg font-bold text-slate-800 mb-3">Feature Importance</p>
+            <HBarChart id="bc2" featureImp={fiData?.feature_importance||null}/>
+          </div>
+        </div>
+      </>
+    ) : (
+      <div className="card p-12 text-center text-slate-400">
+        <span className="w-8 h-8 border-2 border-slate-300 border-t-indigo-600 rounded-full spin inline-block mb-3"/>
+        <p className="text-sm">Loading advanced model analytics...</p>
+      </div>
+    )}
+
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div className="card p-5"><p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">Historical Churn</p><p className="text-lg font-bold text-slate-800 mb-3">Monthly Rate (%)</p><LineChart id="lc2" labels={["Jan","Feb","Mar","Apr","May","Jun","Jul"]} data={[22,28,24,31,26,29,24]} color="#6366f1"/></div>
+      <div className="card p-5"><p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">Historical Revenue</p><p className="text-lg font-bold text-slate-800 mb-3">Avg Monthly ($)</p><LineChart id="lc3" labels={["Jan","Feb","Mar","Apr","May","Jun","Jul"]} data={[64,71,68,74,69,72,68]} color="#10b981"/></div>
+    </div>
+  </div>);
+};
+
+/* ── Customers Page ── */
+const CustomersPage=({hist})=>{
+  const [q,setQ]=useState("");
+  const [flt,setFlt]=useState("All");
+  const rows=(hist||[]).filter(r=>{const ms=!q||r.id?.toLowerCase().includes(q.toLowerCase())||r.name?.toLowerCase().includes(q.toLowerCase());const mf=flt==="All"||r.risk===flt;return ms&&mf;});
+  return(<div className="fu"><div className="card p-5">
+    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-5">
+      <div><p className="text-xs font-semibold text-slate-400 uppercase tracking-wide">Customer Intelligence</p><p className="text-lg font-bold text-slate-800">All Customers</p></div>
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2"><Ic n="search" cls="w-4 h-4 text-slate-400"/><input className="bg-transparent text-sm outline-none text-slate-700 w-28 placeholder-slate-400" placeholder="Search..." value={q} onChange={e=>setQ(e.target.value)}/></div>
+        {["All","High","Medium","Low"].map(f=><button key={f} onClick={()=>setFlt(f)} className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors ${flt===f?"bg-indigo-600 text-white":"bg-slate-50 text-slate-500 hover:bg-indigo-50 hover:text-indigo-600"}`}>{f}</button>)}
+      </div>
+    </div>
+    {rows.length===0?<Empty icon="users" title="No customers found" sub="Make predictions to populate this list"/>:(
+      <div className="overflow-x-auto"><table className="w-full text-sm"><thead><tr className="border-b-2 border-slate-100">{["Customer","Name","Contract","Tenure","Monthly Charge","Risk","Date"].map(h=><th key={h} className="text-left text-xs font-semibold text-slate-400 pb-3 pr-4 whitespace-nowrap">{h}</th>)}</tr></thead>
+      <tbody>{rows.map((r,i)=><tr key={i} className="border-b border-slate-50 hover:bg-indigo-50/30 transition-colors">
+        <td className="py-3 pr-4"><div className="flex items-center gap-2"><div className="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-400 to-indigo-600 flex items-center justify-center text-white text-xs font-bold">{(r.id||"C")[0]}</div><span className="font-medium text-slate-700">{r.id}</span></div></td>
+        <td className="py-3 pr-4 text-slate-600">{r.name||"—"}</td>
+        <td className="py-3 pr-4"><Badge text={(r.contract||"Silver").split(" ")[0]}/></td>
+        <td className="py-3 pr-4 text-slate-400">{r.tenure} mo</td>
+        <td className="py-3 pr-4 text-slate-700">${r.mc||"—"}</td>
+        <td className="py-3 pr-4"><Badge text={r.risk}/></td>
+        <td className="py-3 text-slate-400 text-xs whitespace-nowrap">{r.date}</td>
+      </tr>)}</tbody></table></div>
+    )}
+  </div></div>);
+};
+
+/* ── History Page ── */
+const HistoryPage=({hist, user})=>{
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterRisk, setFilterRisk] = useState("All");
+  
+  // Get user-specific prediction history from localStorage
+  let userPredictions = [];
+  if(user && user.email) {
+    const key = `pred_hist_${user.email}`;
+    userPredictions = JSON.parse(localStorage.getItem(key) || "[]");
+  }
+  
+  // Combine API history and user predictions
+  const allPreds = [...(hist || []), ...userPredictions].sort((a,b) => (b.timestamp || 0) - (a.timestamp || 0));
+  
+  // Filter by search and risk level
+  const filtered = allPreds.filter(r => {
+    const matchSearch = !searchQuery || 
+      r.id?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      r.name?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchRisk = filterRisk === "All" || r.risk_level === filterRisk || r.risk === filterRisk;
+    return matchSearch && matchRisk;
+  });
+  
+  const rows = [...filtered].reverse();
+  
+  return(
+    <div className="fu space-y-4">
+      <div className="card p-5">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-5">
+          <div>
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide">Session Log</p>
+            <p className="text-lg font-bold text-slate-800">Prediction History</p>
+            {user && <p className="text-xs text-slate-400 mt-1">📧 {user.email}</p>}
+          </div>
+          <span className="badge bg-indigo-50 text-indigo-600">{rows.length} records</span>
+        </div>
+        
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mb-5">
+          <div className="flex-1 flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2">
+            <Ic n="search" cls="w-4 h-4 text-slate-400"/>
+            <input 
+              className="bg-transparent text-sm outline-none text-slate-700 w-full placeholder-slate-400" 
+              placeholder="Search by customer ID or name..."
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+            />
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {["All","High","Medium","Low"].map(f => (
+              <button 
+                key={f} 
+                onClick={() => setFilterRisk(f)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors ${
+                  filterRisk === f 
+                    ? "bg-indigo-600 text-white" 
+                    : "bg-slate-50 text-slate-500 hover:bg-indigo-50 hover:text-indigo-600"
+                }`}
+              >
+                {f}
+              </button>
+            ))}
+          </div>
+        </div>
+        
+        {rows.length === 0 ? (
+          <Empty icon="history" title="No predictions found" sub="Make predictions to populate this list"/>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b-2 border-slate-100">
+                  {["#","Customer ID","Name","Contract","Tenure","Churn Prob","Risk","Confidence","Date"].map(h => (
+                    <th key={h} className="text-left text-xs font-semibold text-slate-400 pb-3 pr-4 whitespace-nowrap">{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((r, i) => {
+                  const prob = typeof r.churn_prob === 'number' ? (r.churn_prob * 100).toFixed(1) : r.cp ? (r.cp * 100).toFixed(1) : "0";
+                  const risk = r.risk_level || r.risk || "Medium";
+                  const bc = risk === "High" ? "#ef4444" : risk === "Medium" ? "#f59e0b" : "#10b981";
+                  return (
+                    <tr key={i} className="border-b border-slate-50 hover:bg-indigo-50/30 transition-colors">
+                      <td className="py-3 pr-4 text-slate-400 text-xs tabular-nums">{rows.length - i}</td>
+                      <td className="py-3 pr-4 font-medium text-slate-700">{r.id}</td>
+                      <td className="py-3 pr-4 text-slate-600">{r.name || "—"}</td>
+                      <td className="py-3 pr-4"><Badge text={(r.contract || "Silver").split(" ")[0]}/></td>
+                      <td className="py-3 pr-4 text-slate-400">{r.tenure} mo</td>
+                      <td className="py-3 pr-4" style={{minWidth: 130}}>
+                        <div className="flex items-center gap-2">
+                          <div className="pb flex-1">
+                            <div className="pf" style={{width: `${prob}%`, background: bc}}/>
+                          </div>
+                          <span className="text-xs font-semibold text-slate-600 tabular-nums">{prob}%</span>
+                        </div>
+                      </td>
+                      <td className="py-3 pr-4"><Badge text={risk}/></td>
+                      <td className="py-3 pr-4 text-slate-600 font-semibold">{r.confidence || "—"}%</td>
+                      <td className="py-3 text-slate-400 text-xs whitespace-nowrap">{r.date}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+/* ── About Page (New) ── */
+const AboutPage=()=>(
+  <div className="space-y-6 fu max-w-4xl mx-auto">
+    <div className="card p-6 space-y-4">
+      <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+        <Ic n="shield" cls="w-5 h-5 text-indigo-600"/> Project Overview
+      </h3>
+      <p className="text-sm text-slate-600 leading-relaxed">
+        This platform predicts customer churn using an ensemble machine learning model combining <strong>Random Forest</strong> and <strong>XGBoost</strong> classifiers. By analyzing customer behaviors and profile details, the ensemble calculates the likelihood of a customer leaving, enabling customer success teams to take proactive retention actions.
+      </p>
+      <div className="bg-indigo-50/50 border border-indigo-100 rounded-xl p-4 space-y-2">
+        <h4 className="text-xs font-bold text-indigo-800 uppercase tracking-wide">Key Features Demonstrated:</h4>
+        <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-slate-600">
+          <li className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>End-to-End Machine Learning Pipeline</li>
+          <li className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>Flask REST API Backend (Python)</li>
+          <li className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>Responsive HTML + Tailwind CSS Dashboard</li>
+          <li className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>Batch Customer Inference & Export</li>
+          <li className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>Interactive Analytics & Model Insights</li>
+          <li className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>Feature Importance Visualizations</li>
+        </ul>
+      </div>
+    </div>
+
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="card p-6">
+        <h3 className="text-base font-bold text-slate-800 mb-3 flex items-center gap-2">
+          <Ic n="gear" cls="w-4 h-4 text-slate-500"/> Tech Stack
+        </h3>
+        <table className="w-full text-sm">
+          <tbody>
+            <tr className="border-b border-slate-100"><td className="py-2.5 font-semibold text-slate-500">Frontend</td><td className="py-2.5 text-slate-800">React, Tailwind CSS, Chart.js</td></tr>
+            <tr className="border-b border-slate-100"><td className="py-2.5 font-semibold text-slate-500">Backend</td><td className="py-2.5 text-slate-800">Python, Flask, Flask-CORS</td></tr>
+            <tr className="border-b border-slate-100"><td className="py-2.5 font-semibold text-slate-500">ML Models</td><td className="py-2.5 text-slate-800">Scikit-learn, XGBoost</td></tr>
+            <tr className="border-b border-slate-100"><td className="py-2.5 font-semibold text-slate-500">Data Libraries</td><td className="py-2.5 text-slate-800">Pandas, NumPy, Joblib</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div className="card p-6">
+        <h3 className="text-base font-bold text-slate-800 mb-3 flex items-center gap-2">
+          <Ic n="trend" cls="w-4 h-4 text-slate-500"/> Model Specifications
+        </h3>
+        <table className="w-full text-sm">
+          <tbody>
+            <tr className="border-b border-slate-100"><td className="py-2.5 font-semibold text-slate-500">Classifier</td><td className="py-2.5 text-slate-800">VotingClassifier Ensemble (Soft Voting)</td></tr>
+            <tr className="border-b border-slate-100"><td className="py-2.5 font-semibold text-slate-500">Features Included</td><td className="py-2.5 text-slate-800">8 Behavioural Customer Signals</td></tr>
+            <tr className="border-b border-slate-100"><td className="py-2.5 font-semibold text-slate-500">Dataset Size</td><td className="py-2.5 text-slate-800">2,000 customers (Synthetic Generator)</td></tr>
+            <tr className="border-b border-slate-100"><td className="py-2.5 font-semibold text-slate-500">Evaluation CV</td><td className="py-2.5 text-slate-800">5-Fold Stratified Cross-Validation</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+);
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   ROOT APP
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+const App=()=>{
+  const [screen,  setScreen]  = useState("landing");
+  const [user,    setUser]    = useState(null);
+  const [page,    setPage]    = useState("dashboard");
+  const [col,     setCol]     = useState(false);
+  const [online,  setOnline]  = useState(false);
+  const [stats,   setStats]   = useState(null);
+  const [hist,    setHist]    = useState([]);
+  const [fiData,  setFiData]  = useState(null);
+  const [analytics, setAnalytics] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+
+  useEffect(()=>{
+    const saved=localStorage.getItem("cg_user");
+    if(saved){try{setUser(JSON.parse(saved));setScreen("app");}catch(e){}}
+  },[]);
+
+  useEffect(()=>{
+    document.body.className = screen==="app" ? "dash-mode" : "";
+  },[screen]);
+
+  const refresh=useCallback(async()=>{
+    try{
+      const emailParam = user && user.email ? `?email=${encodeURIComponent(user.email)}` : '';
+      const [s,h,f,a]=await Promise.all([
+        apiGet(`/stats${emailParam}`),
+        apiGet(`/history${emailParam}`),
+        apiGet("/feature-importance"),
+        apiGet("/analytics-data")
+      ]);
+      setStats(s);
+      setHist(h.predictions||[]);
+      setFiData(f);
+      setAnalytics(a);
+      setOnline(true);
+    }catch(err){
+      setOnline(false);
+    }
+  },[user]);
+
+  useEffect(()=>{
+    if(screen==="app"){
+      refresh();
+      const t=setInterval(refresh,15000);
+      return()=>clearInterval(t);
+    }
+  },[screen, refresh]);
+
+  const handleLogin=(u)=>{setUser(u);setScreen("app");};
+  const handleLogout=()=>{localStorage.removeItem("cg_user");setUser(null);setPage("dashboard");setScreen("landing");setSearchQuery("");setShowLogoutConfirm(false);};
+  const handleLogoutClick=()=>setShowLogoutConfirm(true);
+  const handleCancelLogout=()=>setShowLogoutConfirm(false);
+
+  if(screen==="landing") return <LandingPage onLogin={()=>setScreen("login")}/>;
+  if(screen==="login")   return <LoginPage   onLogin={handleLogin} onBack={()=>setScreen("landing")}/>;
+
+  const ml=col?"ml-16":"ml-56";
+  const pages={
+    dashboard:<DashPage stats={stats} hist={hist} fiData={fiData} setPage={setPage}/>,
+    predict:<PredPage onDone={()=>setTimeout(refresh,600)} user={user}/>,
+    batch:<BatchPage/>,
+    analytics:<AnalyticsPage stats={stats} hist={hist} fiData={fiData} analytics={analytics}/>,
+    customers:<CustomersPage hist={hist}/>,
+    history:<HistoryPage hist={hist} user={user}/>,
+    about:<AboutPage/>
+  };
+
+  return(
+    <div className="min-h-screen bg-slate-950 text-slate-100">
+      <Sidebar page={page} setPage={setPage} col={col} setCol={setCol}/>
+      <div className={`${ml} transition-all duration-300 min-h-screen flex flex-col`}>
+        <Navbar page={page} online={online} user={user} searchQuery={searchQuery} onSearchChange={setSearchQuery} onLogoutClick={handleLogoutClick}/>
+        {!online&&(
+          <div className="mx-6 mt-4 flex items-start gap-3 bg-amber-950/20 border border-amber-900/30 rounded-xl p-3 text-sm text-amber-400">
+            <Ic n="warning" cls="w-4 h-4 mt-0.5 flex-shrink-0"/>
+            <div><strong>Flask API is offline.</strong> Run: <code className="bg-amber-900/30 px-1.5 py-0.5 rounded font-mono text-xs text-amber-300">python app.py</code></div>
+          </div>
+        )}
+        <main className="flex-1 p-6">{pages[page]}</main>
+        <footer className="px-6 py-3 border-t border-slate-800 bg-slate-900">
+          <p className="text-xs text-slate-500 text-center">ChurnGuard AI &mdash; RF + XGBoost &mdash; v1.0.0</p>
+        </footer>
+      </div>
+      {showLogoutConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
+          <div className="w-full max-w-md rounded-2xl bg-slate-900 border border-slate-800 shadow-2xl overflow-hidden">
+            <div className="p-6">
+              <div className="flex items-center gap-3">
+                <Ic n="warning" cls="w-5 h-5 text-amber-500"/>
+                <div>
+                  <h2 className="text-lg font-bold text-slate-100">Confirm Logout</h2>
+                  <p className="text-sm text-slate-400">Are you sure you want to log out? You will be returned to the login screen.</p>
+                </div>
+              </div>
+              <div className="mt-6 flex gap-3">
+                <button onClick={handleCancelLogout} className="flex-1 rounded-xl border border-slate-800 bg-slate-950 py-3 text-sm font-semibold text-slate-350 hover:bg-slate-900">Cancel</button>
+                <button onClick={handleLogout} className="flex-1 rounded-xl bg-red-600 py-3 text-sm font-semibold text-white hover:bg-red-750">Logout</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
