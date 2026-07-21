@@ -1,10 +1,6 @@
 """
-preprocess.py – Feature engineering & data preparation utilities.
+preprocess.py – Lightweight feature engineering utilities for deployment.
 """
-import pandas as pd
-import numpy as np
-from sklearn.preprocessing import LabelEncoder
-
 
 FEATURE_COLS = [
     'Age',
@@ -20,35 +16,43 @@ FEATURE_COLS = [
 MEMBERSHIP_MAP = {'Bronze': 0, 'Silver': 1, 'Gold': 2}
 
 
-def encode_membership(df: pd.DataFrame) -> pd.DataFrame:
-    """Encode membership tier as ordinal integer."""
-    df = df.copy()
-    df['Membership'] = df['Membership'].map(MEMBERSHIP_MAP)
-    return df
+def encode_membership(value):
+    """Encode membership tier as an ordinal integer."""
+    return MEMBERSHIP_MAP.get(value, 0)
 
 
-def preprocess(df: pd.DataFrame, feature_cols=None) -> pd.DataFrame:
-    """Run full preprocessing pipeline."""
+def preprocess(data, feature_cols=None):
+    """Run a lightweight preprocessing pipeline on a row or a list of rows."""
     if feature_cols is None:
         feature_cols = FEATURE_COLS
-    df = df[feature_cols].copy()
-    df = encode_membership(df)
-    return df
+
+    if isinstance(data, dict):
+        row = {}
+        for col in feature_cols:
+            if col == 'Membership':
+                row[col] = encode_membership(data.get(col, 'Bronze'))
+            else:
+                row[col] = float(data.get(col, 0))
+        return row
+
+    if isinstance(data, list):
+        return [preprocess(item, feature_cols=feature_cols) for item in data]
+
+    raise TypeError('Expected a dict or list of dicts')
 
 
 def get_feature_input(
     age, tenure, purchase_freq, total_spent, avg_order_val, days_since, membership, support_calls
-) -> pd.DataFrame:
-    """Build a single-row DataFrame from user inputs."""
+):
+    """Build a single-row feature dictionary from user inputs."""
     data = {
-        'Age': [age],
-        'Tenure_Months': [tenure],
-        'Purchase_Frequency': [purchase_freq],
-        'Total_Amount_Spent': [total_spent],
-        'Avg_Order_Value': [avg_order_val],
-        'Days_Since_Last_Purchase': [days_since],
-        'Membership': [membership],
-        'Support_Calls': [support_calls],
+        'Age': age,
+        'Tenure_Months': tenure,
+        'Purchase_Frequency': purchase_freq,
+        'Total_Amount_Spent': total_spent,
+        'Avg_Order_Value': avg_order_val,
+        'Days_Since_Last_Purchase': days_since,
+        'Membership': membership,
+        'Support_Calls': support_calls,
     }
-    df = pd.DataFrame(data)
-    return preprocess(df)
+    return preprocess(data)

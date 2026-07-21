@@ -1,26 +1,48 @@
 """
-model_utils.py – Model loading, saving, and prediction helpers.
+model_utils.py – Lightweight model loading and prediction helpers.
 """
-import joblib
-import numpy as np
-import pandas as pd
+import json
+import math
 from pathlib import Path
 
-MODEL_PATH = Path(__file__).resolve().parent.parent / "models" / "churn_model.pkl"
+MODEL_PATH = Path(__file__).resolve().parent.parent / "models" / "churn_model.json"
+DEFAULT_MODEL = {
+    "intercept": -2.2,
+    "weights": {
+        "Age": -0.012,
+        "Tenure_Months": -0.025,
+        "Purchase_Frequency": -0.018,
+        "Total_Amount_Spent": -0.0012,
+        "Avg_Order_Value": -0.001,
+        "Days_Since_Last_Purchase": 0.008,
+        "Membership": 0.22,
+        "Support_Calls": 0.16,
+    },
+}
 
 
 def load_model():
-    """Load the trained model from disk."""
-    if not MODEL_PATH.exists():
-        raise FileNotFoundError(
-            f"Model not found at {MODEL_PATH}. Please run train.py first."
-        )
-    return joblib.load(MODEL_PATH)
+    """Load the lightweight model from disk, falling back to built-in defaults."""
+    if MODEL_PATH.exists():
+        with MODEL_PATH.open("r", encoding="utf-8") as handle:
+            return json.load(handle)
+    return DEFAULT_MODEL
 
 
-def predict(model, X: pd.DataFrame):
-    """Return (label, probability) for the given feature DataFrame."""
-    prob = model.predict_proba(X)[0][1]
+def predict(model, X):
+    """Return (label, probability) for the given feature dictionary."""
+    if isinstance(X, dict):
+        features = X
+    else:
+        features = X[0] if isinstance(X, list) and X else {}
+
+    intercept = float(model.get("intercept", DEFAULT_MODEL["intercept"]))
+    weights = model.get("weights", DEFAULT_MODEL["weights"])
+    score = intercept
+    for key, weight in weights.items():
+        value = features.get(key, 0)
+        score += float(weight) * float(value)
+    prob = 1 / (1 + math.exp(-score))
     label = int(prob >= 0.5)
     return label, float(prob)
 

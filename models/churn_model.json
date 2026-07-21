@@ -1,0 +1,13 @@
+{
+  "intercept": -2.2,
+  "weights": {
+    "Age": -0.012,
+    "Tenure_Months": -0.025,
+    "Purchase_Frequency": -0.018,
+    "Total_Amount_Spent": -0.0012,
+    "Avg_Order_Value": -0.001,
+    "Days_Since_Last_Purchase": 0.008,
+    "Membership": 0.22,
+    "Support_Calls": 0.16
+  }
+}

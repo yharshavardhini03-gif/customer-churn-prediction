@@ -6,6 +6,7 @@ Run:  python app.py
 import os
 import sys
 import io
+import csv
 import json
 from pathlib import Path
 from datetime import datetime
@@ -19,9 +20,6 @@ sys.path.insert(0, str(ROOT))
 
 from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
-import pandas as pd
-import numpy as np
-import joblib
 
 from utils.preprocess import get_feature_input, FEATURE_COLS, MEMBERSHIP_MAP, preprocess
 from utils.model_utils import load_model, predict, get_risk_level
@@ -91,14 +89,39 @@ def get_importances():
     if MODEL is None:
         return {}
     try:
-        base = MODEL.estimators_[0][1] if hasattr(MODEL, "estimators_") else MODEL
-        fi = base.feature_importances_
+        weights = MODEL.get("weights", {})
         names = ["Age", "Tenure", "Purchase Freq", "Total Spent",
                  "Avg Order", "Days Since Purchase", "Membership", "Support Calls"]
-        total = fi.sum() or 1
-        return {n: round(float(v / total) * 100, 1) for n, v in zip(names, fi)}
+        values = [weights.get("Age", 0.0), weights.get("Tenure_Months", 0.0), weights.get("Purchase_Frequency", 0.0),
+                  weights.get("Total_Amount_Spent", 0.0), weights.get("Avg_Order_Value", 0.0),
+                  weights.get("Days_Since_Last_Purchase", 0.0), weights.get("Membership", 0.0), weights.get("Support_Calls", 0.0)]
+        total = sum(abs(v) for v in values) or 1
+        return {n: round(float(abs(v) / total) * 100, 1) for n, v in zip(names, values)}
     except Exception:
         return {}
+
+
+def _calculate_roc_data(y_true, y_prob):
+    thresholds = [0.0] + [round(i / 100, 2) for i in range(1, 101)] + [1.0]
+    fpr_values = []
+    tpr_values = []
+    for threshold in thresholds:
+        tp = fp = tn = fn = 0
+        for actual, prob in zip(y_true, y_prob):
+            pred = 1 if prob >= threshold else 0
+            if pred == 1 and actual == 1:
+                tp += 1
+            elif pred == 1 and actual == 0:
+                fp += 1
+            elif pred == 0 and actual == 0:
+                tn += 1
+            else:
+                fn += 1
+        tpr = tp / (tp + fn) if (tp + fn) else 0.0
+        fpr = fp / (fp + tn) if (fp + tn) else 0.0
+        fpr_values.append(fpr)
+        tpr_values.append(tpr)
+    return fpr_values, tpr_values
 
 
 # ── Routes ────────────────────────────────────────────────────────────────
@@ -218,49 +241,50 @@ def predict_batch():
         if not file.filename.endswith('.csv'):
             return jsonify({"error": "Only CSV files are supported"}), 400
             
-        # Read CSV
-        raw_df = pd.read_csv(file)
-        
-        # Verify required columns are present
-        missing_cols = [c for c in FEATURE_COLS if c not in raw_df.columns]
+        # Read CSV as rows of dictionaries
+        csv_text = file.read().decode("utf-8")
+        reader = csv.DictReader(io.StringIO(csv_text))
+        rows = list(reader)
+        if not rows:
+            return jsonify({"error": "CSV file is empty"}), 400
+
+        missing_cols = [c for c in FEATURE_COLS if c not in rows[0]]
         if missing_cols:
             return jsonify({"error": f"Missing required columns in CSV: {missing_cols}"}), 400
-            
-        # Run preprocessing and prediction
-        X = preprocess(raw_df)
-        probs = MODEL.predict_proba(X)[:, 1]
-        preds = (probs >= 0.5).astype(int)
-        
+
+        features = [preprocess(row) for row in rows]
+        labels = []
+        probs = []
         risks = []
-        for p in probs:
-            risk_lvl, _ = get_risk_level(p)
+        for feature in features:
+            label, prob = predict(MODEL, feature)
+            labels.append(label)
+            probs.append(prob)
+            risk_lvl, _ = get_risk_level(prob)
             risks.append(risk_lvl)
-            
-        # Add result columns to df
-        result_df = raw_df.copy()
-        result_df["Churn_Prediction"] = preds
-        result_df["Churn_Probability"] = np.round(probs * 100, 1)
-        result_df["Risk_Level"] = risks
-        
-        records = result_df.to_dict(orient="records")
-        
-        # Calculate stats
-        total_customers = len(result_df)
-        predicted_churners = int(preds.sum())
-        churn_rate = round(float(preds.mean() * 100), 1)
-        avg_probability = round(float(probs.mean() * 100), 1)
-        
-        # Count risk categories
-        risk_series = pd.Series(risks)
-        high_count = int((risk_series == "High").sum())
-        med_count = int((risk_series == "Medium").sum())
-        low_count = int((risk_series == "Low").sum())
-        
-        # Create CSV result string
+
+        records = []
+        for row, label, prob, risk_lvl in zip(rows, labels, probs, risks):
+            record = dict(row)
+            record["Churn_Prediction"] = label
+            record["Churn_Probability"] = round(prob * 100, 1)
+            record["Risk_Level"] = risk_lvl
+            records.append(record)
+
+        total_customers = len(records)
+        predicted_churners = int(sum(labels))
+        churn_rate = round(float(sum(labels) / total_customers * 100), 1) if total_customers else 0.0
+        avg_probability = round(float(sum(probs) / total_customers * 100), 1) if total_customers else 0.0
+        high_count = sum(1 for r in risks if r == "High")
+        med_count = sum(1 for r in risks if r == "Medium")
+        low_count = sum(1 for r in risks if r == "Low")
+
         csv_buffer = io.StringIO()
-        result_df.to_csv(csv_buffer, index=False)
+        writer = csv.DictWriter(csv_buffer, fieldnames=list(records[0].keys()), lineterminator="\n")
+        writer.writeheader()
+        writer.writerows(records)
         csv_string = csv_buffer.getvalue()
-        
+
         return jsonify({
             "records": records,
             "summary": {
@@ -348,51 +372,62 @@ def get_analytics_data():
     if MODEL is None:
         return jsonify({"error": "Model not loaded"}), 503
     try:
-        from sklearn.model_selection import train_test_split
-        from sklearn.metrics import roc_curve, confusion_matrix
-        
         data_path = ROOT / "data" / "customer_churn.csv"
         if not data_path.exists():
             return jsonify({"error": "Dataset not found. Run python train.py first."}), 404
-            
-        df = pd.read_csv(data_path)
-        X = preprocess(df)
-        y = df["Churn"]
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
-        
-        y_prob = MODEL.predict_proba(X_test)[:, 1]
-        y_pred = (y_prob >= 0.5).astype(int)
-        
-        # ROC curve
-        fpr, tpr, _ = roc_curve(y_test, y_prob)
-        # Downsample ROC curve for efficiency (approx 60 points is plenty for visualization)
+
+        with data_path.open("r", encoding="utf-8", newline="") as handle:
+            rows = list(csv.DictReader(handle))
+
+        y_true = []
+        y_prob = []
+        for row in rows:
+            feature_row = preprocess(row)
+            _, prob = predict(MODEL, feature_row)
+            y_prob.append(prob)
+            y_true.append(int(float(row.get("Churn", 0))))
+
+        fpr, tpr = _calculate_roc_data(y_true, y_prob)
         step = max(1, len(fpr) // 60)
-        fpr_down = fpr[::step].tolist()
-        tpr_down = tpr[::step].tolist()
-        if len(fpr_down) == 0 or fpr_down[-1] != fpr[-1]:
-            fpr_down.append(float(fpr[-1]))
-            tpr_down.append(float(tpr[-1]))
-            
-        # Confusion matrix
-        cm = confusion_matrix(y_test, y_pred).tolist() # [[TN, FP], [FN, TP]]
-        
-        # Probability distribution histogram data (20 bins)
-        bins = np.linspace(0, 1, 21)
-        p0 = y_prob[y_test == 0]
-        p1 = y_prob[y_test == 1]
-        counts0, _ = np.histogram(p0, bins=bins)
-        counts1, _ = np.histogram(p1, bins=bins)
-        
-        bin_labels = [f"{round(bins[i]*100):.0f}-{round(bins[i+1]*100):.0f}%" for i in range(len(bins)-1)]
-        
+        fpr_down = [round(v, 4) for v in fpr[::step]]
+        tpr_down = [round(v, 4) for v in tpr[::step]]
+        if not fpr_down or fpr_down[-1] != round(fpr[-1], 4):
+            fpr_down.append(round(fpr[-1], 4))
+            tpr_down.append(round(tpr[-1], 4))
+
+        tp = fp = fn = tn = 0
+        for actual, prob in zip(y_true, y_prob):
+            pred = 1 if prob >= 0.5 else 0
+            if pred == 1 and actual == 1:
+                tp += 1
+            elif pred == 1 and actual == 0:
+                fp += 1
+            elif pred == 0 and actual == 0:
+                tn += 1
+            else:
+                fn += 1
+        cm = [[tn, fp], [fn, tp]]
+
+        bins = [i / 20 for i in range(21)]
+        stay_counts = [0] * 20
+        churn_counts = [0] * 20
+        for actual, prob in zip(y_true, y_prob):
+            idx = min(int(prob * 20), 19)
+            if actual == 0:
+                stay_counts[idx] += 1
+            else:
+                churn_counts[idx] += 1
+
+        bin_labels = [f"{round(bins[i] * 100):.0f}-{round(bins[i + 1] * 100):.0f}%" for i in range(len(bins) - 1)]
+
         return jsonify({
             "fpr": fpr_down,
             "tpr": tpr_down,
             "cm": cm,
             "histogram": {
                 "bins": bin_labels,
-                "stay": counts0.tolist(),
-                "churn": counts1.tolist()
+                "stay": stay_counts,
+                "churn": churn_counts
             }
         })
     except Exception as e:
