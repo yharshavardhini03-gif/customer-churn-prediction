@@ -5,5 +5,12 @@ __pycache__/
 .pytest_cache/
 .venv/
 venv/
+.env/
+*.egg-info/
+build/
+dist/
 models/*.pkl
 screenshots/
+assets/
+frontend/
+data/
