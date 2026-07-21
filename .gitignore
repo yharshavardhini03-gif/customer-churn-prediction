@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+*.so
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+.env
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+*.egg
+
+# Model binaries (large)
+models/*.pkl
+
+# Runtime data (generated at runtime, not needed in git)
+data/predictions_history.json
+data/sent_recommendations.log
+
+# Testing
+.pytest_cache/
+.tox/
+htmlcov/
+.coverage
+
+# Jupyter
+.ipynb_checkpoints
+
+# IDEs
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
