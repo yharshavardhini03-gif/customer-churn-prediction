@@ -27,6 +27,9 @@ from utils.model_utils import load_model, predict, get_risk_level
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+import urllib.request
+import urllib.parse
+import base64
 
 # Path to the HTML frontend
 FRONTEND_INDEX = str(ROOT / "frontend" / "index.html")
@@ -520,64 +523,76 @@ def send_recommendation():
                 f"with code SHIRTLOVE. Free delivery included! Shop now: http://amzn.to/shirtlove"
             )
             
-        # Send real email using smtplib if Gmail SMTP credentials are provided
-        is_real_sent = False
-        smtp_error = None
-        if method == "email" and sender_email and sender_password:
-            try:
-                import smtplib
-                from email.mime.text import MIMEText
-                from email.mime.multipart import MIMEMultipart
-                
-                msg = MIMEMultipart()
-                msg['From'] = sender_email
-                msg['To'] = recipient
-                msg['Subject'] = subject
-                msg.attach(MIMEText(body, 'plain', 'utf-8'))
-                
-                server = smtplib.SMTP('smtp.gmail.com', 587)
-                server.starttls()
-                server.login(sender_email, sender_password)
-                server.sendmail(sender_email, recipient, msg.as_string())
-                server.quit()
-                is_real_sent = True
-            except Exception as e:
-                smtp_error = str(e)
-                print(f"[SMTP Error] Failed to send real email: {smtp_error}")
-                
-        if sender_email and sender_password and method == "email" and not is_real_sent:
-            return jsonify({"error": f"Failed to send real email: {smtp_error}"}), 400
-            
-        # Log to server console
-        print(f"\n==================================================")
-        print(f"SENDING {method.upper()} TO: {recipient} (Real send: {is_real_sent})")
-        print(f"--------------------------------------------------")
-        print(body)
-        print(f"==================================================\n")
-        
-        # Save log of sent recommendations in a text file
+        # Attempt real delivery for email or SMS if credentials/provider configured
+        details = {"method": method, "recipient": recipient, "body": body, "real_sent": False}
+
+        # Email path
+        if method == "email":
+            # prefer explicit sender creds from request, else environment
+            send_user = sender_email or os.environ.get('SMTP_USER') or os.environ.get('EMAIL_USER')
+            send_pass = sender_password or os.environ.get('SMTP_PASS') or os.environ.get('EMAIL_PASS')
+            smtp_host = os.environ.get('SMTP_HOST', 'smtp.gmail.com')
+            smtp_port = int(os.environ.get('SMTP_PORT', 587))
+
+            if send_user and send_pass:
+                try:
+                    msg = MIMEMultipart()
+                    msg['From'] = send_user
+                    msg['To'] = recipient
+                    msg['Subject'] = subject
+                    msg.attach(MIMEText(body, 'plain', 'utf-8'))
+
+                    server = smtplib.SMTP(smtp_host, smtp_port, timeout=15)
+                    server.starttls()
+                    server.login(send_user, send_pass)
+                    server.sendmail(send_user, recipient, msg.as_string())
+                    server.quit()
+                    details['real_sent'] = True
+                except Exception as e:
+                    details['error'] = f"SMTP send failed: {e}"
+            else:
+                details['note'] = 'No SMTP configured; running in demo/mock mode.'
+
+        # SMS path (use Twilio REST API if configured)
+        elif method == 'sms':
+            tw_sid = os.environ.get('TWILIO_SID')
+            tw_token = os.environ.get('TWILIO_TOKEN')
+            tw_from = os.environ.get('TWILIO_FROM')
+            if tw_sid and tw_token and tw_from:
+                try:
+                    url = f"https://api.twilio.com/2010-04-01/Accounts/{tw_sid}/Messages.json"
+                    data = {'From': tw_from, 'To': recipient, 'Body': body}
+                    data_encoded = urllib.parse.urlencode(data).encode('utf-8')
+                    req = urllib.request.Request(url, data=data_encoded)
+                    auth = base64.b64encode(f"{tw_sid}:{tw_token}".encode('utf-8')).decode('ascii')
+                    req.add_header('Authorization', f'Basic {auth}')
+                    resp = urllib.request.urlopen(req, timeout=15)
+                    resp_body = resp.read().decode('utf-8')
+                    details['real_sent'] = True
+                    details['twilio_response'] = resp_body
+                except Exception as e:
+                    details['error'] = f"Twilio send failed: {e}"
+            else:
+                details['note'] = 'No Twilio configured; running in demo/mock mode.'
+
+        # Log to server console and a file
+        print(f"\n[Recommendation] Method={method} Recipient={recipient} Real={details.get('real_sent')}\n{body}\n")
         log_file = ROOT / "data" / "sent_recommendations.log"
         log_file.parent.mkdir(parents=True, exist_ok=True)
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         with open(log_file, "a", encoding="utf-8") as lf:
-            lf.write(f"[{timestamp}] Method: {method.upper()}, Recipient: {recipient}, Customer: {customer_name}, Real: {is_real_sent}\n")
+            lf.write(f"[{timestamp}] Method: {method.upper()}, Recipient: {recipient}, Real: {details.get('real_sent')}\n")
             lf.write(f"Content:\n{body}\n")
+            if details.get('error'):
+                lf.write(f"Error: {details.get('error')}\n")
+            if details.get('note'):
+                lf.write(f"Note: {details.get('note')}\n")
             lf.write("-" * 80 + "\n")
-            
-        success_msg = f"Recommendation successfully sent via {method}!"
-        if is_real_sent:
-            success_msg = f"Real email successfully sent to {recipient}!"
-            
-        return jsonify({
-            "status": "success",
-            "message": success_msg,
-            "details": {
-                "method": method,
-                "recipient": recipient,
-                "body": body,
-                "real_sent": is_real_sent
-            }
-        })
+
+        # Return result (error if attempted and failed)
+        if details.get('error'):
+            return jsonify({"error": details.get('error')}), 500
+        return jsonify({"status": "success", "message": "Recommendation processed", "details": details})
     except Exception as e:
         return jsonify({"error": str(e)}), 400
 
