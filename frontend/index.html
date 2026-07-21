@@ -379,16 +379,23 @@ const LoginPage = ({onLogin, onBack}) => {
         setErr("Invalid credentials.");
       }
     } else {
-      // Create new account with phone
+      // Create new account with phone OR email
       const isPhone = /^[\d\s\-\+\(\)]+$/.test(cred);
-      if (!isPhone) {
-        setErr("New accounts require a phone number. Please enter your phone number.");
+      const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cred);
+      if (!isPhone && !isEmail) {
+        setErr("New accounts require a valid phone number or email. Please enter a phone or email.");
       } else {
-        const newUser = {
+        const newUser = isPhone ? {
           email: `user_${Date.now()}@churnguard.ai`,
           phone: cred,
           password,
           name: cred,
+          role: "User"
+        } : {
+          email: cred.toLowerCase(),
+          phone: null,
+          password,
+          name: cred.split('@')[0],
           role: "User"
         };
         localStorage.setItem("cg_users", JSON.stringify([...storedUsers, newUser]));
@@ -427,12 +434,28 @@ const LoginPage = ({onLogin, onBack}) => {
       const code = Math.random().toString().slice(2, 8);
       localStorage.setItem(`reset_${user.email}`, JSON.stringify({code, timestamp: Date.now()}));
       
-      // Simulate sending message
-      const isPhone = /^[\d\s\-\+\(\)]+$/.test(cred);
-      if (isPhone) {
-        setForgotMsg(`SMS sent to ${cred}\nReset code: ${code} (valid for 10 minutes)`);
-      } else {
-        setForgotMsg(`Email sent to ${cred}\nReset code: ${code} (valid for 10 minutes)`);
+      // Attempt to send reset code via backend. Backend will use server SMTP if configured,
+      // otherwise it will return a mock response that contains the code.
+      try {
+        const res = await fetch('/send-reset', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({recipient: cred, code})
+        });
+        const j = await res.json();
+        if (j.status === 'success') {
+          setForgotMsg(`Email sent to ${cred} (check inbox). Reset code: ${code} (valid for 10 minutes)`);
+        } else if (j.status === 'mock') {
+          // Server not configured to send SMTP — fallback to showing the code in UI
+          setForgotMsg(`Email sending not configured on server. Reset code: ${code} (shown for demo).`);
+        } else if (j.error) {
+          setForgotErr(`Failed to send email: ${j.error}`);
+        } else {
+          setForgotMsg(`Reset code: ${code} (status: ${j.message || 'unknown'})`);
+        }
+      } catch (err) {
+        // Network or other error — fallback to showing the code for demo purposes
+        setForgotMsg(`Could not contact server to send email. Reset code: ${code} (demo fallback).`);
       }
       
       setForgotStep("code");

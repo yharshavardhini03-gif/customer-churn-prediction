@@ -24,6 +24,10 @@ from flask_cors import CORS
 from utils.preprocess import get_feature_input, FEATURE_COLS, MEMBERSHIP_MAP, preprocess
 from utils.model_utils import load_model, predict, get_risk_level
 
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+
 # Path to the HTML frontend
 FRONTEND_INDEX = str(ROOT / "frontend" / "index.html")
 
@@ -222,6 +226,56 @@ def predict_churn():
             save_prediction(user_email, record)
 
         return jsonify(result)
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+
+
+@app.route("/send-reset", methods=["POST"])
+def send_reset():
+    """Send a password reset code email (uses env SMTP creds if available).
+    Request JSON: {recipient: str, code: str, sender_email?: str, sender_password?: str}
+    """
+    try:
+        data = request.get_json(force=True)
+        recipient = data.get("recipient")
+        code = data.get("code")
+
+        if not recipient or not code:
+            return jsonify({"error": "recipient and code are required"}), 400
+
+        # Use provided sender credentials or fall back to environment variables
+        sender_email = data.get("sender_email") or os.environ.get("SMTP_USER") or os.environ.get("EMAIL_USER")
+        sender_password = data.get("sender_password") or os.environ.get("SMTP_PASS") or os.environ.get("EMAIL_PASS")
+
+        subject = "ChurnGuard password reset code"
+        body = (
+            f"Your ChurnGuard password reset code is: {code}\n\n"
+            "This code is valid for 10 minutes. If you did not request this, you can ignore this message."
+        )
+
+        if not sender_email or not sender_password:
+            # No SMTP configured on server — return a helpful message so frontend can fallback
+            return jsonify({"status": "mock", "message": f"Reset code generated: {code} (no SMTP configured)"})
+
+        # Build and send the email
+        msg = MIMEMultipart()
+        msg['From'] = sender_email
+        msg['To'] = recipient
+        msg['Subject'] = subject
+        msg.attach(MIMEText(body, 'plain', 'utf-8'))
+
+        try:
+            smtp_host = os.environ.get('SMTP_HOST', 'smtp.gmail.com')
+            smtp_port = int(os.environ.get('SMTP_PORT', 587))
+            server = smtplib.SMTP(smtp_host, smtp_port, timeout=15)
+            server.starttls()
+            server.login(sender_email, sender_password)
+            server.sendmail(sender_email, recipient, msg.as_string())
+            server.quit()
+            return jsonify({"status": "success", "message": "Reset email sent"})
+        except Exception as e:
+            return jsonify({"error": f"Failed to send reset email: {e}"}), 500
 
     except Exception as e:
         return jsonify({"error": str(e)}), 400
