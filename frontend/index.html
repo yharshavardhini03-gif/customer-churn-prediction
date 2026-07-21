@@ -493,8 +493,7 @@ const LoginPage = ({onLogin, onBack}) => {
         setResetCode("");
         return;
       }
-
-      setForgotMsg("Code verified! Now enter your new password.");
+        setForgotMsg("Code verified! Now enter your new password.");
       setForgotStep("reset");
     } else if (forgotStep === "reset") {
       if (newPw.length < 6) {
@@ -525,28 +524,14 @@ const LoginPage = ({onLogin, onBack}) => {
           localStorage.setItem("cg_users", JSON.stringify(storedUsers));
         }
       }
-
       localStorage.removeItem(`reset_${user.email}`);
-      setForgotMsg("Password reset successful! You can now login with your new password.");
-      setTimeout(() => {
-        setShowForgot(false);
-        setForgotStep("email");
-        setForgotCred("");
-        setResetCode("");
-        setNewPw("");
-        setForgotMsg("");
-      }, 2000);
+      setForgotMsg("Password reset successful! You can now login.");
+      setTimeout(()=>{setShowForgot(false);setForgotStep("email");setForgotCred("");setResetCode("");setNewPw("");setForgotMsg("");},2000);
     }
   };
 
   const closeForgot = () => {
-    setShowForgot(false);
-    setForgotStep("email");
-    setForgotCred("");
-    setResetCode("");
-    setNewPw("");
-    setForgotErr("");
-    setForgotMsg("");
+    setShowForgot(false); setForgotStep("email"); setForgotCred(""); setResetCode(""); setNewPw(""); setForgotErr(""); setForgotMsg("");
   };
 
   return (
@@ -555,145 +540,250 @@ const LoginPage = ({onLogin, onBack}) => {
       <div className="orb orb2" style={{opacity:.2}}/>
       <div className="relative z-10 min-h-screen flex flex-col items-center justify-center px-4 py-12">
 
-        <button onClick={onBack} className="absolute top-6 left-6 flex items-center gap-2 text-slate-400 hover:text-white transition-colors text-sm font-medium">
+        <button onClick={step==="otp"?backToCredentials:onBack}
+          className="absolute top-6 left-6 flex items-center gap-2 text-slate-400 hover:text-white transition-colors text-sm font-medium">
           <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7"/>
           </svg>
-          Back to Home
+          {step==="otp" ? "Back to Login" : "Back to Home"}
         </button>
 
-        <div className="login-card fu">
-          <div className="flex items-center justify-center gap-2.5 mb-8">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center shadow-lg">
-              <Ic n="shield" cls="w-5 h-5 text-white"/>
-            </div>
-            <div>
-              <p className="font-black text-slate-800 text-lg leading-none">ChurnGuard</p>
-              <p className="text-indigo-600 font-bold text-sm leading-none">AI Platform</p>
-            </div>
-          </div>
-
-          <h2 className="text-2xl font-black text-slate-800 mb-1 text-center">Welcome back</h2>
-          <p className="text-slate-500 text-sm text-center mb-7">Sign in to your dashboard</p>
-
-          {err && (
-            <div className="lerr mb-4">
-              <Ic n="warning" cls="w-4 h-4 flex-shrink-0"/>
-              {err}
-            </div>
-          )}
-
-          <form onSubmit={submit} className="space-y-4">
-            <div>
-              <label className="lfl">Email or Phone Number</label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
-                  <Ic n="mail" cls="w-4 h-4"/>
-                </span>
-                <input type="text" className="lfi pl-10" 
-                  placeholder="admin@churnguard.ai or +919876543210"
-                  value={credential} onChange={e=>{setCredential(e.target.value);setErr("")}} required/>
+        {/* ══ STEP 1: Credentials ══ */}
+        {step==="credentials" && (
+          <div className="login-card fu">
+            <div className="flex items-center justify-center gap-2.5 mb-6">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center shadow-lg">
+                <Ic n="shield" cls="w-5 h-5 text-white"/>
               </div>
-              <p className="text-xs text-slate-400 mt-2">Enter your email address or phone number to sign in.</p>
-            </div>
-            <div>
-              <label className="lfl">Password</label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
-                  <Ic n="lock" cls="w-4 h-4"/>
-                </span>
-                <input type={showPw?"text":"password"} className="lfi pl-10 pr-10"
-                  placeholder="Enter your password"
-                  value={password} onChange={e=>{setPassword(e.target.value);setErr("")}} required/>
-                <button type="button" onClick={()=>setShowPw(!showPw)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
-                  <Ic n={showPw?"eyeoff":"eye"} cls="w-4 h-4"/>
-                </button>
+              <div>
+                <p className="font-black text-slate-800 text-lg leading-none">ChurnGuard</p>
+                <p className="text-indigo-600 font-bold text-sm leading-none">AI Platform</p>
               </div>
             </div>
 
-            <div className="flex items-center justify-between">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" className="w-4 h-4 rounded accent-indigo-600"
-                  checked={remember} onChange={e=>setRemember(e.target.checked)}/>
-                <span className="text-sm text-slate-600">Remember me</span>
-              </label>
-              <button type="button" onClick={()=>setShowForgot(true)} 
-                className="text-sm text-indigo-600 font-semibold hover:text-indigo-700">Forgot password?</button>
+            {/* Step progress */}
+            <div className="flex items-center justify-center gap-2 mb-6">
+              <div className="flex items-center gap-1.5">
+                <div className="w-6 h-6 rounded-full bg-indigo-600 flex items-center justify-center text-white text-[11px] font-bold">1</div>
+                <span className="text-xs font-semibold text-indigo-700">Credentials</span>
+              </div>
+              <div className="flex-1 h-px bg-slate-200 max-w-[40px]"/>
+              <div className="flex items-center gap-1.5">
+                <div className="w-6 h-6 rounded-full border-2 border-slate-200 flex items-center justify-center text-slate-400 text-[11px] font-bold">2</div>
+                <span className="text-xs font-semibold text-slate-400">Verify OTP</span>
+              </div>
             </div>
 
-            <button type="submit" disabled={loading}
-              className="w-full py-3 rounded-xl text-white font-bold text-sm flex items-center justify-center gap-2 transition-all"
-              style={{background:"linear-gradient(135deg,#6366f1,#4f46e5)",boxShadow:"0 4px 20px rgba(99,102,241,0.4)"}}>
-              {loading
-                ? <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full spin"/>Signing in...</>
-                : <><Ic n="shield" cls="w-4 h-4"/>Sign In to Dashboard</>}
-            </button>
-          </form>
+            <h2 className="text-2xl font-black text-slate-800 mb-1 text-center">Welcome back</h2>
+            <p className="text-slate-500 text-sm text-center mb-6">Sign in to your dashboard</p>
 
-          <div className="mt-6 pt-6 border-t border-slate-100">
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide text-center mb-3">Demo Accounts — Click to fill</p>
-            <div className="space-y-2">
-              {DEMO_USERS.map((u,i)=>(
-                <button key={i} onClick={()=>fillDemo(u)}
-                  className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl bg-slate-50 hover:bg-indigo-50 border border-slate-100 hover:border-indigo-200 transition-all text-left">
-                  <div className="flex items-center gap-3">
-                    <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-400 to-indigo-600 flex items-center justify-center text-white text-xs font-bold">
-                      {u.name[0]}
+            {err && <div className="lerr mb-4"><Ic n="warning" cls="w-4 h-4 flex-shrink-0"/>{err}</div>}
+
+            <form onSubmit={submit} className="space-y-4">
+              <div>
+                <label className="lfl">Email or Phone Number</label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"><Ic n="mail" cls="w-4 h-4"/></span>
+                  <input type="text" className="lfi pl-10"
+                    placeholder="admin@churnguard.ai or +919876543210"
+                    value={credential} onChange={e=>{setCredential(e.target.value);setErr("")}} required/>
+                </div>
+              </div>
+              <div>
+                <label className="lfl">Password</label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"><Ic n="lock" cls="w-4 h-4"/></span>
+                  <input type={showPw?"text":"password"} className="lfi pl-10 pr-10"
+                    placeholder="Enter your password"
+                    value={password} onChange={e=>{setPassword(e.target.value);setErr("")}} required/>
+                  <button type="button" onClick={()=>setShowPw(!showPw)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                    <Ic n={showPw?"eyeoff":"eye"} cls="w-4 h-4"/>
+                  </button>
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" className="w-4 h-4 rounded accent-indigo-600"
+                    checked={remember} onChange={e=>setRemember(e.target.checked)}/>
+                  <span className="text-sm text-slate-600">Remember me</span>
+                </label>
+                <button type="button" onClick={()=>setShowForgot(true)}
+                  className="text-sm text-indigo-600 font-semibold hover:text-indigo-700">Forgot password?</button>
+              </div>
+              <button type="submit" disabled={loading}
+                className="w-full py-3 rounded-xl text-white font-bold text-sm flex items-center justify-center gap-2 transition-all"
+                style={{background:"linear-gradient(135deg,#6366f1,#4f46e5)",boxShadow:"0 4px 20px rgba(99,102,241,0.4)"}}>
+                {loading
+                  ? <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full spin"/>Verifying...</>
+                  : <><Ic n="shield" cls="w-4 h-4"/>Continue to Verification →</>}
+              </button>
+            </form>
+
+            <div className="mt-5 pt-5 border-t border-slate-100">
+              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide text-center mb-3">Demo Accounts</p>
+              <div className="space-y-2">
+                {DEMO_USERS.map((u,i)=>(
+                  <button key={i} onClick={()=>fillDemo(u)}
+                    className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl bg-slate-50 hover:bg-indigo-50 border border-slate-100 hover:border-indigo-200 transition-all text-left">
+                    <div className="flex items-center gap-3">
+                      <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-400 to-indigo-600 flex items-center justify-center text-white text-xs font-bold">{u.name[0]}</div>
+                      <div>
+                        <p className="text-xs font-semibold text-slate-700">{u.email}</p>
+                        <p className="text-xs text-slate-400">{u.role}</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-xs font-semibold text-slate-700">{u.email}</p>
-                      <p className="text-xs text-slate-400">{u.role}</p>
-                    </div>
-                  </div>
-                  <span className="text-xs font-mono text-slate-400 bg-slate-100 px-2 py-0.5 rounded">{u.password}</span>
-                </button>
-              ))}
+                    <span className="text-xs font-mono text-slate-400 bg-slate-100 px-2 py-0.5 rounded">{u.password}</span>
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
+        {/* ══ STEP 2: OTP Verification ══ */}
+        {step==="otp" && (
+          <div className="login-card fu" style={{maxWidth:440}}>
+            <div className="flex items-center justify-center gap-2.5 mb-5">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center shadow-lg">
+                <Ic n="shield" cls="w-5 h-5 text-white"/>
+              </div>
+              <div>
+                <p className="font-black text-slate-800 text-lg leading-none">ChurnGuard</p>
+                <p className="text-indigo-600 font-bold text-sm leading-none">AI Platform</p>
+              </div>
+            </div>
+
+            {/* Step progress */}
+            <div className="flex items-center justify-center gap-2 mb-5">
+              <div className="flex items-center gap-1.5">
+                <div className="w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center">
+                  <Ic n="check" cls="w-3 h-3 text-white"/>
+                </div>
+                <span className="text-xs font-semibold text-emerald-600">Credentials</span>
+              </div>
+              <div className="flex-1 h-px bg-indigo-300 max-w-[40px]"/>
+              <div className="flex items-center gap-1.5">
+                <div className="w-6 h-6 rounded-full bg-indigo-600 flex items-center justify-center text-white text-[11px] font-bold">2</div>
+                <span className="text-xs font-semibold text-indigo-700">Verify OTP</span>
+              </div>
+            </div>
+
+            {/* Shield icon with verified badge */}
+            <div className="flex justify-center mb-4">
+              <div className="relative">
+                <div className="w-16 h-16 rounded-2xl bg-indigo-50 border-2 border-indigo-100 flex items-center justify-center">
+                  <Ic n="shield" cls="w-8 h-8 text-indigo-500"/>
+                </div>
+                <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center">
+                  <Ic n="check" cls="w-3 h-3 text-white"/>
+                </span>
+              </div>
+            </div>
+
+            <h2 className="text-xl font-black text-slate-800 mb-1 text-center">2-Step Verification</h2>
+            <p className="text-slate-500 text-sm text-center mb-1">
+              A 6-digit code was sent to
+            </p>
+            <p className="text-indigo-700 font-bold text-sm text-center mb-4">{pendingUser?.cred}</p>
+
+            {/* Countdown */}
+            {countdown>0 && (
+              <div className="flex items-center justify-center gap-1.5 mb-3">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+                  className={`w-4 h-4 ${countdown<60?"text-red-500":"text-slate-400"}`}>
+                  <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                </svg>
+                <span className={`text-xs font-semibold tabular-nums ${countdown<60?"text-red-500":"text-slate-400"}`}>
+                  Code valid for {fmt(countdown)}
+                </span>
+              </div>
+            )}
+
+            {/* OTP info message */}
+            {otpMsg && (
+              <div className="bg-indigo-50 border border-indigo-200 rounded-xl px-3 py-2.5 mb-4 text-xs text-indigo-700 flex items-start gap-2">
+                <Ic n="mail" cls="w-3.5 h-3.5 flex-shrink-0 mt-0.5"/>
+                <span>{otpMsg}</span>
+              </div>
+            )}
+
+            {otpErr && <div className="lerr mb-4"><Ic n="warning" cls="w-4 h-4 flex-shrink-0"/>{otpErr}</div>}
+
+            <form onSubmit={verifyOTP} className="space-y-5">
+              <div>
+                <label className="lfl text-center block mb-3">Enter Verification Code</label>
+                {/* 6 individual OTP digit boxes */}
+                <div className="flex gap-2 justify-center" onPaste={handleOtpPaste}>
+                  {otpDigits.map((d, i) => (
+                    <input key={i} ref={otpRefs[i]}
+                      type="text" inputMode="numeric" maxLength={1}
+                      value={d}
+                      onChange={e => handleOtpDigit(i, e.target.value)}
+                      onKeyDown={e => handleOtpKeyDown(i, e)}
+                      className="w-11 h-14 text-center text-xl font-bold rounded-xl outline-none transition-all"
+                      style={{
+                        border: `2px solid ${otpErr?"#fca5a5":d?"#6366f1":"#e2e8f0"}`,
+                        background: d?"rgba(99,102,241,0.07)":"#f8fafc",
+                        color:"#1e293b",
+                        boxShadow: d?"0 0 0 3px rgba(99,102,241,0.15)":"none",
+                        caretColor:"#6366f1"
+                      }}
+                    />
+                  ))}
+                </div>
+                <p className="text-xs text-slate-400 text-center mt-2">You can paste the code directly</p>
+              </div>
+
+              <button type="submit" disabled={otpLoading || otpDigits.join("").length!==6}
+                className="w-full py-3 rounded-xl text-white font-bold text-sm flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{background:"linear-gradient(135deg,#6366f1,#4f46e5)",boxShadow:"0 4px 20px rgba(99,102,241,0.4)"}}>
+                {otpLoading
+                  ? <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full spin"/>Verifying...</>
+                  : <><Ic n="shield" cls="w-4 h-4"/>Verify &amp; Sign In</>}
+              </button>
+
+              <div className="text-center">
+                <span className="text-sm text-slate-500">Didn't receive the code? </span>
+                {resendCool>0
+                  ? <span className="text-sm font-semibold text-slate-400">Resend in {resendCool}s</span>
+                  : <button type="button" onClick={handleResend}
+                      className="text-sm font-semibold text-indigo-600 hover:text-indigo-700 underline underline-offset-2">
+                      Resend Code
+                    </button>
+                }
+              </div>
+            </form>
+          </div>
+        )}
+
+        {/* Forgot Password Modal */}
         {showForgot && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
             <div className="login-card fu max-w-sm">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-xl font-bold text-slate-800">Reset Password</h3>
-                <button onClick={closeForgot} className="text-slate-400 hover:text-slate-600">
-                  <Ic n="x" cls="w-5 h-5"/>
-                </button>
+                <button onClick={closeForgot} className="text-slate-400 hover:text-slate-600"><Ic n="x" cls="w-5 h-5"/></button>
               </div>
-
-              {forgotErr && (
-                <div className="lerr mb-4">
-                  <Ic n="warning" cls="w-4 h-4 flex-shrink-0"/>
-                  {forgotErr}
-                </div>
-              )}
-
+              {forgotErr && <div className="lerr mb-4"><Ic n="warning" cls="w-4 h-4 flex-shrink-0"/>{forgotErr}</div>}
               {forgotMsg && (
                 <div className="bg-emerald-50 border border-emerald-200 rounded-lg px-4 py-3 mb-4 text-sm text-emerald-700 flex items-start gap-2">
-                  <Ic n="check" cls="w-4 h-4 flex-shrink-0 mt-0.5"/>
-                  <span>{forgotMsg}</span>
+                  <Ic n="check" cls="w-4 h-4 flex-shrink-0 mt-0.5"/><span>{forgotMsg}</span>
                 </div>
               )}
-
               <form onSubmit={handleForgotSubmit} className="space-y-4">
-                {forgotStep === "email" && (
+                {forgotStep==="email" && (
                   <div>
                     <label className="lfl">Email or Phone Number</label>
                     <div className="relative">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
-                        <Ic n="mail" cls="w-4 h-4"/>
-                      </span>
-                      <input type="text" className="lfi pl-10"
-                        placeholder="admin@churnguard.ai or +919876543210"
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"><Ic n="mail" cls="w-4 h-4"/></span>
+                      <input type="text" className="lfi pl-10" placeholder="admin@churnguard.ai or +919876543210"
                         value={forgotCred} onChange={e=>{setForgotCred(e.target.value);setForgotErr("")}} required/>
                     </div>
                     <p className="text-xs text-slate-400 mt-2">We'll send you a reset code via email or SMS.</p>
                   </div>
                 )}
-
-                {forgotStep === "code" && (
+                {forgotStep==="code" && (
                   <div>
                     <label className="lfl">Reset Code</label>
                     <input type="text" className="lfi text-center text-2xl tracking-widest"
@@ -702,30 +792,24 @@ const LoginPage = ({onLogin, onBack}) => {
                     <p className="text-xs text-slate-400 mt-2">Enter the 6-digit code sent to your email or phone.</p>
                   </div>
                 )}
-
-                {forgotStep === "reset" && (
+                {forgotStep==="reset" && (
                   <div>
                     <label className="lfl">New Password</label>
                     <div className="relative">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
-                        <Ic n="lock" cls="w-4 h-4"/>
-                      </span>
-                      <input type="password" className="lfi pl-10"
-                        placeholder="Enter new password"
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"><Ic n="lock" cls="w-4 h-4"/></span>
+                      <input type="password" className="lfi pl-10" placeholder="Enter new password"
                         value={newPw} onChange={e=>{setNewPw(e.target.value);setForgotErr("")}} required/>
                     </div>
                     <p className="text-xs text-slate-400 mt-2">Minimum 6 characters required.</p>
                   </div>
                 )}
-
                 <button type="submit"
                   className="w-full py-2.5 rounded-xl text-white font-bold text-sm flex items-center justify-center gap-2 transition-all"
                   style={{background:"linear-gradient(135deg,#6366f1,#4f46e5)"}}>
-                  {forgotStep === "email" && "Send Reset Code"}
-                  {forgotStep === "code" && "Verify Code"}
-                  {forgotStep === "reset" && "Reset Password"}
+                  {forgotStep==="email"&&"Send Reset Code"}
+                  {forgotStep==="code"&&"Verify Code"}
+                  {forgotStep==="reset"&&"Reset Password"}
                 </button>
-
                 <button type="button" onClick={closeForgot}
                   className="w-full py-2 rounded-xl border border-slate-200 text-slate-600 font-semibold text-sm hover:bg-slate-50">
                   Cancel
@@ -1073,29 +1157,7 @@ const PredPage=({onDone, user})=>{
       const r=await apiPost("/predict", {...form, user_email: user?.email});
       if(r.error)throw new Error(r.error);
       setResult(r);
-      
-      // Save to user prediction history in localStorage as backup
-      if(user && user.email){
-        const key=`pred_hist_${user.email}`;
-        const existing=JSON.parse(localStorage.getItem(key)||"[]");
-        const prediction={
-          id:form.customer_id||`C-${Date.now()}`,
-          name:form.name,
-          churn_prob:r.churn_prob,
-          risk_level:r.risk_level,
-          confidence:r.confidence,
-          contract:form.membership,
-          tenure:form.tenure,
-          mc:form.avg_order,
-          date:new Date().toLocaleDateString("en-IN"),
-          timestamp:Date.now(),
-          will_churn:r.will_churn,
-          insights:r.insights||[]
-        };
-        existing.push(prediction);
-        localStorage.setItem(key,JSON.stringify(existing));
-      }
-      
+      // Server saves prediction per user_email — no local backup needed
       onDone&&onDone();
     }catch(e){
       setErr(e.message||"Prediction failed.");
@@ -1743,18 +1805,8 @@ const HistoryPage=({hist, user})=>{
   const [searchQuery, setSearchQuery] = useState("");
   const [filterRisk, setFilterRisk] = useState("All");
   
-  // Get user-specific prediction history from localStorage
-  let userPredictions = [];
-  if(user && user.email) {
-    const key = `pred_hist_${user.email}`;
-    userPredictions = JSON.parse(localStorage.getItem(key) || "[]");
-  }
-  
-  // Combine API history and user predictions
-  const allPreds = [...(hist || []), ...userPredictions].sort((a,b) => (b.timestamp || 0) - (a.timestamp || 0));
-  
-  // Filter by search and risk level
-  const filtered = allPreds.filter(r => {
+  // hist is already filtered server-side by user email — no localStorage mixing needed
+  const filtered = (hist || []).filter(r => {
     const matchSearch = !searchQuery || 
       r.id?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       r.name?.toLowerCase().includes(searchQuery.toLowerCase());

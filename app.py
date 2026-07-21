@@ -12,8 +12,14 @@ from pathlib import Path
 from datetime import datetime
 
 os.environ.setdefault("PYTHONIOENCODING", "utf-8")
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
-sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace")
+# Note: do NOT rewrap sys.stdout/stderr on Vercel (no .buffer attribute in serverless)
+try:
+    if hasattr(sys.stdout, 'buffer'):
+        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
+    if hasattr(sys.stderr, 'buffer'):
+        sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace")
+except Exception:
+    pass
 
 ROOT = Path(__file__).parent.resolve()
 sys.path.insert(0, str(ROOT))
@@ -49,7 +55,9 @@ except FileNotFoundError:
 # In-memory history of predictions (starts empty or with some sample history if desired)
 HISTORY = []
 
-HISTORY_FILE = ROOT / "data" / "predictions_history.json"
+# On Vercel the filesystem is read-only except /tmp; use /tmp for runtime data
+_IS_VERCEL = os.environ.get("VERCEL") == "1" or os.environ.get("VERCEL_ENV") is not None
+HISTORY_FILE = Path("/tmp/predictions_history.json") if _IS_VERCEL else (ROOT / "data" / "predictions_history.json")
 
 def save_prediction(user_email, prediction_record):
     try:
@@ -575,19 +583,24 @@ def send_recommendation():
             else:
                 details['note'] = 'No Twilio configured; running in demo/mock mode.'
 
-        # Log to server console and a file
+        # Log to server console and a file (/tmp on Vercel, data/ locally)
         print(f"\n[Recommendation] Method={method} Recipient={recipient} Real={details.get('real_sent')}\n{body}\n")
-        log_file = ROOT / "data" / "sent_recommendations.log"
-        log_file.parent.mkdir(parents=True, exist_ok=True)
-        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        with open(log_file, "a", encoding="utf-8") as lf:
-            lf.write(f"[{timestamp}] Method: {method.upper()}, Recipient: {recipient}, Real: {details.get('real_sent')}\n")
-            lf.write(f"Content:\n{body}\n")
-            if details.get('error'):
-                lf.write(f"Error: {details.get('error')}\n")
-            if details.get('note'):
-                lf.write(f"Note: {details.get('note')}\n")
-            lf.write("-" * 80 + "\n")
+        try:
+            log_file = Path("/tmp/sent_recommendations.log") if _IS_VERCEL else (ROOT / "data" / "sent_recommendations.log")
+            if not _IS_VERCEL:
+                log_file.parent.mkdir(parents=True, exist_ok=True)
+            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            with open(log_file, "a", encoding="utf-8") as lf:
+                lf.write(f"[{timestamp}] Method: {method.upper()}, Recipient: {recipient}, Real: {details.get('real_sent')}\n")
+                lf.write(f"Content:\n{body}\n")
+                if details.get('error'):
+                    lf.write(f"Error: {details.get('error')}\n")
+                if details.get('note'):
+                    lf.write(f"Note: {details.get('note')}\n")
+                lf.write("-" * 80 + "\n")
+        except Exception as log_err:
+            print(f"[Log Warning] Could not write recommendation log: {log_err}")
+
 
         # Return result (error if attempted and failed)
         if details.get('error'):

@@ -40,3 +40,32 @@ Amazon Customer Relations & Retentions Team
 Content:
 Hi harsha! We miss you. Since you bought shirts with us, get up to 40% OFF on Amazon with code SHIRTLOVE. Free delivery included! Shop now: http://amzn.to/shirtlove
 --------------------------------------------------------------------------------
+[2026-07-21 10:39:30] Method: SMS, Recipient: +919433923395, Real: False
+Content:
+Hi Priya! We miss you. Since you bought shirts with us, get up to 40% OFF on Amazon with code SHIRTLOVE. Free delivery included! Shop now: http://amzn.to/shirtlove
+Note: No Twilio configured; running in demo/mock mode.
+--------------------------------------------------------------------------------
+[2026-07-21 10:43:21] Method: SMS, Recipient: 9493392395, Customer: harsha
+Content:
+Hi harsha! We miss you. Since you bought shirts with us, get up to 40% OFF on Amazon with code SHIRTLOVE. Free delivery included! Shop now: http://amzn.to/shirtlove
+--------------------------------------------------------------------------------
+[2026-07-21 10:48:03] Method: SMS, Recipient: 9493392395, Customer: harsha
+Content:
+Hi harsha! We miss you. Since you bought shirts with us, get up to 40% OFF on Amazon with code SHIRTLOVE. Free delivery included! Shop now: http://amzn.to/shirtlove
+--------------------------------------------------------------------------------
+[2026-07-21 10:55:21] Method: SMS, Recipient: +919493392395, Customer: ramu
+Content:
+Hi ramu! We miss you. Since you bought shirts with us, get up to 40% OFF on Amazon with code SHIRTLOVE. Free delivery included! Shop now: http://amzn.to/shirtlove
+--------------------------------------------------------------------------------
+[2026-07-21 11:01:17] Method: SMS, Recipient: +919493392395, Customer: priya
+Content:
+Hi priya! We miss you. Since you bought shirts with us, get up to 40% OFF on Amazon with code SHIRTLOVE. Free delivery included! Shop now: http://amzn.to/shirtlove
+--------------------------------------------------------------------------------
+[2026-07-21 11:19:23] Method: SMS, Recipient: +919493392395, Customer: siri
+Content:
+Hi siri! We miss you. Since you bought shirts with us, get up to 40% OFF on Amazon with code SHIRTLOVE. Free delivery included! Shop now: http://amzn.to/shirtlove
+--------------------------------------------------------------------------------
+[2026-07-21 12:40:27] Method: SMS, Recipient: +919493392395, Customer: siri
+Content:
+Hi siri! We miss you. Since you bought shirts with us, get up to 40% OFF on Amazon with code SHIRTLOVE. Free delivery included! Shop now: http://amzn.to/shirtlove
+--------------------------------------------------------------------------------

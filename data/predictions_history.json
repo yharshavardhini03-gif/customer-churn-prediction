@@ -35,5 +35,97 @@
             "date": "2026-07-21",
             "timestamp": 1784583112.084825
         }
+    ],
+    "user_1784609655354@churnguard.ai": [
+        {
+            "id": "1",
+            "name": "naga",
+            "contract": "Silver Member",
+            "tenure": 12,
+            "mc": 37.5,
+            "cp": 0.0192,
+            "risk": "Low",
+            "date": "2026-07-21",
+            "timestamp": 1784610190.414707
+        },
+        {
+            "id": "2",
+            "name": "priya",
+            "contract": "Bronze Member",
+            "tenure": 2,
+            "mc": 65.0,
+            "cp": 0.5812,
+            "risk": "Medium",
+            "date": "2026-07-21",
+            "timestamp": 1784610363.419083
+        },
+        {
+            "id": "3",
+            "name": "harsha",
+            "contract": "Silver Member",
+            "tenure": 2,
+            "mc": 90.0,
+            "cp": 0.4024,
+            "risk": "Low",
+            "date": "2026-07-21",
+            "timestamp": 1784610693.339545
+        },
+        {
+            "id": "3",
+            "name": "harsha",
+            "contract": "Silver Member",
+            "tenure": 2,
+            "mc": 225.0,
+            "cp": 0.9227,
+            "risk": "High",
+            "date": "2026-07-21",
+            "timestamp": 1784610792.979947
+        }
+    ],
+    "user_1784611322882@churnguard.ai": [
+        {
+            "id": "4",
+            "name": "ramu",
+            "contract": "Silver Member",
+            "tenure": 2,
+            "mc": 225.0,
+            "cp": 0.9373,
+            "risk": "High",
+            "date": "2026-07-21",
+            "timestamp": 1784611512.634199
+        },
+        {
+            "id": "5",
+            "name": "priya",
+            "contract": "Silver Member",
+            "tenure": 2,
+            "mc": 225.0,
+            "cp": 0.9165,
+            "risk": "High",
+            "date": "2026-07-21",
+            "timestamp": 1784611853.909971
+        },
+        {
+            "id": "7",
+            "name": "siri",
+            "contract": "Silver Member",
+            "tenure": 1,
+            "mc": 450.0,
+            "cp": 0.9067,
+            "risk": "High",
+            "date": "2026-07-21",
+            "timestamp": 1784612951.134642
+        },
+        {
+            "id": "3",
+            "name": "siri",
+            "contract": "Silver Member",
+            "tenure": 2,
+            "mc": 225.0,
+            "cp": 0.5558,
+            "risk": "Medium",
+            "date": "2026-07-21",
+            "timestamp": 1784617817.882077
+        }
     ]
 }

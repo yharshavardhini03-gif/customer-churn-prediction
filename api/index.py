@@ -1,4 +1,9 @@
+import sys
+import os
+
+# Add project root to path so app.py and utils/ can be imported
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from app import app
 
-if __name__ == "__main__":
-    app.run()
+# Vercel expects the WSGI app to be named 'app'
